@@ -74,12 +74,12 @@ class DateParserDisplayTest(tool.Tool):
         else:
             self.parent_window = None
             self.run_tool()
-            
+
 # Year for each country can be taked from https://en.wikipedia.org/wiki/Julian_calendar
 # or https://en.wikipedia.org/wiki/Gregorian_calendar
 # Spain, Portugal, France, Poland, Italy, Catholic Low Countries, Luxemburg - 1582
 # Britain and the British Empire (including the eastern part of what is now the United States) adopted the Gregorian calendar in 1752.
-# Sweden followed in 1753. 
+# Sweden followed in 1753.
 # Turkey on 16 February/1 March 1917
 # Russia on 1/14 February 1918
 # Greece on 16 February/1 March 1923
