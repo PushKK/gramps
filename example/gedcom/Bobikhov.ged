@@ -6685,7 +6685,7 @@
 2 DATE 24 JUN 2021
 3 TIME 16:48:49
 0 @O0805@ OBJE
-1 FILE /home/user/Документы/Родословная/https://github.com/PushKK/gramps/raw/PushKK-patch-9/example/gedcom/photo.png
+1 FILE https://github.com/PushKK/gramps/raw/PushKK-patch-9/example/gedcom/photo.png
 2 FORM png
 2 TITL photo
 1 CHAN
