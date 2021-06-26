@@ -6587,35 +6587,35 @@
 2 DATE 24 JUN 2021
 3 TIME 14:50:01
 0 @O0755@ OBJE
-1 FILE /home/user/Документы/Родословная/Гавриловы-Бобиховы/Фотографии/От Юлии Арсентьевой (Бобиховой)/Бобихов Вячеслав Алексеевич.jpg
+1 FILE https://github.com/PushKK/gramps/raw/PushKK-patch-9/example/gedcom/pictures/169.jpg
 2 FORM jpg
 2 TITL Бобихов Вячеслав Алексеевич
 1 CHAN
 2 DATE 24 JUN 2021
 3 TIME 14:48:24
 0 @O0756@ OBJE
-1 FILE /home/user/Документы/Родословная/Гавриловы-Бобиховы/Фотографии/От Юлии Арсентьевой (Бобиховой)/Бобихов Владимир Алексеевич.jpg
+1 FILE https://github.com/PushKK/gramps/raw/PushKK-patch-9/example/gedcom/pictures/174.jpg
 2 FORM jpg
 2 TITL Бобихов Владимир Алексеевич
 1 CHAN
 2 DATE 24 JUN 2021
 3 TIME 14:48:24
 0 @O0757@ OBJE
-1 FILE /home/user/Документы/Родословная/Гавриловы-Бобиховы/Фотографии/От Юлии Арсентьевой (Бобиховой)/Бобихова Ирина Алексеевна.jpg
+1 FILE https://github.com/PushKK/gramps/raw/PushKK-patch-9/example/gedcom/pictures/172.jpg
 2 FORM jpg
 2 TITL Бобихова Ирина Алексеевна
 1 CHAN
 2 DATE 24 JUN 2021
 3 TIME 14:48:24
 0 @O0758@ OBJE
-1 FILE /home/user/Документы/Родословная/Гавриловы-Бобиховы/Фотографии/От Юлии Арсентьевой (Бобиховой)/Бобихова Галина Алексеевна.jpg
+1 FILE https://github.com/PushKK/gramps/raw/PushKK-patch-9/example/gedcom/pictures/173-1.jpg
 2 FORM jpg
 2 TITL Бобихова Галина Алексеевна
 1 CHAN
 2 DATE 24 JUN 2021
 3 TIME 14:48:24
 0 @O0760@ OBJE
-1 FILE /home/user/Документы/Родословная/Гавриловы-Бобиховы/Фотографии/От Юлии Арсентьевой (Бобиховой)/Бобихов Сергей Вячеславович.png
+1 FILE https://github.com/PushKK/gramps/raw/PushKK-patch-9/example/gedcom/pictures/827.png
 2 FORM png
 2 TITL Сергей
 1 CHAN
@@ -6664,7 +6664,7 @@
 2 DATE 22 JUN 2021
 3 TIME 18:21:20
 0 @O0791@ OBJE
-1 FILE https://github.com/PushKK/gramps/raw/PushKK-patch-9/example/gedcom/pictures/829.png
+1 FILE https://github.com/PushKK/gramps/raw/PushKK-patch-9/example/gedcom/pictures/829.jpg
 2 FORM jpg
 2 TITL Бобихова Л. С
 1 CHAN
