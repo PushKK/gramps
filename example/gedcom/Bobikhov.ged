@@ -6545,14 +6545,14 @@
 2 DATE 13 JUN 2021
 3 TIME 09:07:35
 0 @O0723@ OBJE
-1 FILE /home/user/Документы/Родословная/Гавриловы-Бобиховы/Фотографии/От Юлии Арсентьевой (Бобиховой)/Бобихов А.М..jpg
+1 FILE https://github.com/PushKK/gramps/raw/PushKK-patch-9/example/gedcom/pictures/169.jpg
 2 FORM jpg
 2 TITL Бобихов А.М.
 1 CHAN
 2 DATE 24 JUN 2021
 3 TIME 14:48:24
 0 @O0735@ OBJE
-1 FILE /home/user/Документы/Родословная/Гавриловы-Бобиховы/Фотографии/От Юлии Арсентьевой (Бобиховой)/Юлия Арсентьева.png
+1 FILE https://github.com/PushKK/gramps/raw/PushKK-patch-9/example/gedcom/pictures/825.png
 2 FORM png
 2 TITL Юлия Арсентьева
 1 CHAN
@@ -6566,14 +6566,14 @@
 2 DATE 25 JUN 2021
 3 TIME 11:53:39
 0 @O0752@ OBJE
-1 FILE /home/user/Документы/Родословная/Гавриловы-Бобиховы/Фотографии/От Юлии Арсентьевой (Бобиховой)/Бобихов Иван Михайлович.jpg
+1 FILE https://github.com/PushKK/gramps/raw/PushKK-patch-9/example/gedcom/pictures/846.jpg
 2 FORM jpg
 2 TITL Бобихов Иван Михайлович
 1 CHAN
 2 DATE 24 JUN 2021
 3 TIME 14:48:24
 0 @O0753@ OBJE
-1 FILE /home/user/Документы/Родословная/Гавриловы-Бобиховы/Фотографии/От Юлии Арсентьевой (Бобиховой)/Бобихова Евдокия Михайловна.jpg
+1 FILE https://github.com/PushKK/gramps/raw/PushKK-patch-9/example/gedcom/pictures/852.jpg
 2 FORM jpg
 2 TITL Бобихова Евдокия Михайловна
 1 CHAN
