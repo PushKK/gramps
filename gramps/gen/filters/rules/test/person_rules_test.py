@@ -32,6 +32,7 @@ from ....db.utils import import_as_dict
 from ....filters import GenericFilter, CustomFilters
 from ....const import DATA_DIR
 from ....user import User
+from ....utils.unittest import localize_date
 
 from ..person import (
     Disconnected, Everyone, FamilyWithIncompleteEvent, HasAddress,
@@ -98,9 +99,10 @@ class BaseTest(unittest.TestCase):
         filter_.set_invert(invert)
         stime = perf_counter()
         results = filter_.apply(self.db)
-        if __debug__:
-            rulename = inspect.stack()[1][3]
-            print("%s: %.2f\n" % (rulename, perf_counter() - stime))
+        # if __debug__:
+            # frame = inspect.currentframe()
+            # rulename = frame.f_back.f_code.co_name
+            # print("%s: %.2f\n" % (rulename, perf_counter() - stime))
         return set(results)
 
     def test_Complex_1(self):
@@ -237,7 +239,8 @@ class BaseTest(unittest.TestCase):
         """
         Test rule.
         """
-        rule = HasBirth(['between 1600 and 1700', 'akron', ''])
+        date_str = localize_date('between 1600 and 1700')
+        rule = HasBirth([date_str, 'akron', ''])
         res = self.filter_with_rule(rule)
         self.assertEqual(len(res), 2)
 
@@ -245,7 +248,8 @@ class BaseTest(unittest.TestCase):
         """
         Test HasDeath rule.
         """
-        rule = HasDeath(['between 1600 and 1700', 'ashtabula', ''])
+        date_str = localize_date('between 1600 and 1700')
+        rule = HasDeath([date_str, 'ashtabula', ''])
         res = self.filter_with_rule(rule)
         self.assertEqual(len(res), 2)
 
@@ -253,8 +257,8 @@ class BaseTest(unittest.TestCase):
         """
         Test rule.
         """
-        rule = HasEvent(['Birth', 'between 1600 and 1700', 'akron',
-                         '', '', 1])
+        date_str = localize_date('between 1600 and 1700')
+        rule = HasEvent(['Birth', date_str, 'akron', '', '', 1])
         res = self.filter_with_rule(rule)
         self.assertEqual(len(res), 2)
 
@@ -270,7 +274,8 @@ class BaseTest(unittest.TestCase):
         """
         Test rule.
         """
-        rule = HasFamilyEvent(['Marriage', 'after 1900', 'craw', ''])
+        date_str = localize_date('after 1900')
+        rule = HasFamilyEvent(['Marriage', date_str, 'craw', ''])
         res = self.filter_with_rule(rule)
         self.assertEqual(len(res), 4)
 
@@ -346,7 +351,7 @@ class BaseTest(unittest.TestCase):
         """
         rule = ProbablyAlive(['1900'])
         res = self.filter_with_rule(rule)
-        self.assertEqual(len(res), 766)
+        self.assertEqual(len(res), 733)
 
     def test_RegExpName(self):
         """
