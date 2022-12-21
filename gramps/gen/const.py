@@ -122,14 +122,13 @@ TOOL_OPTIONS = os.path.join(HOME_DIR, "tool_options.xml")
 PLACE_FORMATS = os.path.join(HOME_DIR, "place_formats.xml")
 
 ENV_DIR = os.path.join(HOME_DIR, "env")
-TEMP_DIR = os.path.join(HOME_DIR, "temp")
 THUMB_DIR = os.path.join(HOME_DIR, "thumb")
 THUMB_NORMAL = os.path.join(THUMB_DIR, "normal")
 THUMB_LARGE = os.path.join(THUMB_DIR, "large")
 USER_PLUGINS = os.path.join(VERSION_DIR, "plugins")
 USER_CSS = os.path.join(HOME_DIR, "css")
 # dirs checked/made for each Gramps session
-USER_DIRLIST = (USER_HOME, HOME_DIR, VERSION_DIR, ENV_DIR, TEMP_DIR, THUMB_DIR,
+USER_DIRLIST = (USER_HOME, HOME_DIR, VERSION_DIR, ENV_DIR, THUMB_DIR,
                 THUMB_NORMAL, THUMB_LARGE, USER_PLUGINS, USER_CSS)
 
 
@@ -164,11 +163,6 @@ PLUGINS_DIR = os.path.join(ROOT_DIR, "plugins")
 
 USE_TIPS = False
 
-if sys.platform == 'win32':
-    USE_THUMBNAILER = False
-else:
-    USE_THUMBNAILER = True
-
 #-------------------------------------------------------------------------
 #
 # Paths to data files.
@@ -199,7 +193,6 @@ ENV = {
     "major_version": major_version,
     "VERSION_DIR": VERSION_DIR,
     "ENV_DIR": ENV_DIR,
-    "TEMP_DIR": TEMP_DIR,
     "THUMB_DIR": THUMB_DIR,
     "THUMB_NORMAL": THUMB_NORMAL,
     "THUMB_LARGE": THUMB_LARGE,
@@ -226,7 +219,7 @@ GTK_GETTEXT_DOMAIN = 'gtk30'
 #
 #-------------------------------------------------------------------------
 COPYRIGHT_MSG = "© 2001-2006 Donald N. Allingham\n" \
-                "© 2007-2020 The Gramps Developers"
+                "© 2007-2022 The Gramps Developers"
 COMMENTS = _("Gramps\n (Genealogical Research and Analysis "
              "Management Programming System)\n"
              "is a personal genealogy program.")
@@ -256,6 +249,8 @@ DOCUMENTERS = [
 #-------------------------------------------------------------------------
 THUMBSCALE = 96.0
 THUMBSCALE_LARGE = 180.0
+SIZE_NORMAL = 0
+SIZE_LARGE = 1
 XMLFILE = "data.gramps"
 NO_SURNAME = "(%s)" % _("none", "surname")
 NO_GIVEN = "(%s)" % _("none", "given-name")

@@ -90,7 +90,8 @@ class GrampletBar(Gtk.Notebook):
     """
     A class which defines the graphical representation of the GrampletBar.
     """
-    def __init__(self, dbstate, uistate, pageview, configfile, defaults):
+    def __init__(self, dbstate, uistate, pageview, configfile, defaults,
+                 orientation=Gtk.Orientation.VERTICAL):
         Gtk.Notebook.__init__(self)
 
         self.dbstate = dbstate
@@ -98,6 +99,7 @@ class GrampletBar(Gtk.Notebook):
         self.pageview = pageview
         self.configfile = os.path.join(VERSION_DIR, "%s.ini" % configfile)
         self.defaults = defaults
+        self.orientation = orientation
         self.detached_gramplets = []
         self.empty = False
         self.close_buttons = []
@@ -373,10 +375,6 @@ class GrampletBar(Gtk.Notebook):
         """
         Add a tab to the notebook for the given gramplet.
         """
-        width = -1  # Allow tab width to adjust (smaller) to sidebar
-        height = min(int(self.uistate.screen_height() * 0.20), 400)
-        gramplet.set_size_request(width, height)
-
         label = self.__create_tab_label(gramplet)
         page_num = self.append_page(gramplet, label)
         return page_num
@@ -437,6 +435,8 @@ class GrampletBar(Gtk.Notebook):
         Called when a new page is added to the GrampletBar.
         """
         gramplet = self.get_nth_page(new_page)
+        if isinstance(gramplet, TabGramplet):
+            gramplet.set_orientation(self.orientation)
         if self.empty:
             if isinstance(gramplet, TabGramplet):
                 self.empty = False
@@ -637,6 +637,12 @@ class TabGramplet(Gtk.ScrolledWindow, GuiGramplet):
         Return the top level container widget.
         """
         return self
+
+    def set_orientation(self, orientation):
+        """
+        Called when the gramplet orientation changes.
+        """
+        self.pui.set_orientation(orientation)
 
 #-------------------------------------------------------------------------
 #
