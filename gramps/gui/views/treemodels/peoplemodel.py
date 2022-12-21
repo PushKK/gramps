@@ -84,6 +84,7 @@ COLUMN_TAGS = 18
 COLUMN_PRIV = 19
 
 invalid_date_format = config.get('preferences.invalid-date-format')
+no_surname = config.get("preferences.no-surname-text")
 
 #-------------------------------------------------------------------------
 #
@@ -265,7 +266,7 @@ class PeopleBaseModel(BaseModel):
             event = self.db.get_event_from_handle(er.ref)
             etype = event.get_type()
             date_str = get_date(event)
-            if (etype in [EventType.BAPTISM, EventType.CHRISTEN]
+            if (etype.is_birth_fallback()
                 and er.get_role() == EventRoleType.PRIMARY
                 and date_str != ""):
                 if sort_mode:
@@ -322,9 +323,7 @@ class PeopleBaseModel(BaseModel):
             event = self.db.get_event_from_handle(er.ref)
             etype = event.get_type()
             date_str = get_date(event)
-            if (etype in [EventType.BURIAL,
-                          EventType.CREMATION,
-                          EventType.CAUSE_DEATH]
+            if (etype.is_death_fallback()
                 and er.get_role() == EventRoleType.PRIMARY
                 and date_str):
                 if sort_mode:
@@ -366,8 +365,8 @@ class PeopleBaseModel(BaseModel):
                 er.unserialize(event_ref)
                 event = self.db.get_event_from_handle(er.ref)
                 etype = event.get_type()
-                if (etype in [EventType.BAPTISM, EventType.CHRISTEN] and
-                    er.get_role() == EventRoleType.PRIMARY):
+                if (etype.is_birth_fallback()
+                    and er.get_role() == EventRoleType.PRIMARY):
                         place_title = place_displayer.display_event(self.db, event)
                         if place_title:
                             value = "<i>%s</i>" % escape(place_title)
@@ -406,8 +405,7 @@ class PeopleBaseModel(BaseModel):
                 er.unserialize(event_ref)
                 event = self.db.get_event_from_handle(er.ref)
                 etype = event.get_type()
-                if (etype in [EventType.BURIAL, EventType.CREMATION,
-                              EventType.CAUSE_DEATH]
+                if (etype.is_death_fallback()
                     and er.get_role() == EventRoleType.PRIMARY):
 
                         place_title = place_displayer.display_event(self.db, event)
@@ -614,7 +612,7 @@ class PersonTreeModel(PeopleBaseModel, TreeBaseModel):
         return [_('Group As'), _('Name')]
 
     def column_header(self, node):
-        return node.name
+        return node.name if node.name else no_surname
 
     def add_row(self, handle, data):
         """

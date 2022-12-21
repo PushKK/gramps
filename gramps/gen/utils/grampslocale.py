@@ -87,6 +87,7 @@ _LOCALE_NAMES = {
     'he': ('Hebrew_Israel', '1255', _("Hebrew")),
     'hr': ('Croatian_Croatia', '1250', _("Croatian")),
     'hu': ('Hungarian_Hungary', '1250', _("Hungarian")),
+    'id': ('Indonesian', '1057', _("Indonesian")),
     'is': ('Icelandic', '1252', _("Icelandic")),
     'it': ('Italian_Italy', '1252', _("Italian")),
     'ja': ('Japanese_Japan', '932', _("Japanese")),
@@ -118,7 +119,7 @@ _LOCALE_NAMES = {
 _RTL_LOCALES = ('ar', 'he')
 
 # locales with less than 70% currently translated
-INCOMPLETE_TRANSLATIONS = ('ar', 'bg', 'he', 'sq', 'ta', 'tr')
+INCOMPLETE_TRANSLATIONS = ('ar', 'bg', 'sq', 'ta', 'tr', 'zh_HK', 'zh_TW')
 
 def _check_mswin_locale(locale):
     msloc = None
@@ -526,6 +527,8 @@ class GrampsLocale:
         # with locale instead of gettext. Win32 doesn't support bindtextdomain.
         if self.localedir:
             if not sys.platform == 'win32':
+                # bug12278, _build_popup_ui() under linux and macOS
+                locale.textdomain(self.localedomain)
                 locale.bindtextdomain(self.localedomain, self.localedir)
             else:
                 self._win_bindtextdomain(self.localedomain.encode('utf-8'),
@@ -1191,7 +1194,7 @@ class GrampsTranslations(gettext.GNUTranslations):
         """
         return gettext.GNUTranslations.ngettext(self, singular, plural, num)
 
-    def sgettext(self, msgid, context='', sep='|'):
+    def sgettext(self, msgid, context=''):
         """
         Strip the context used for resolving translation ambiguities.
 
@@ -1211,11 +1214,7 @@ class GrampsTranslations(gettext.GNUTranslations):
         """
         if '\x04' in msgid: # Deferred translation
             context, msgid = msgid.split('\x04')
-        msgval = self.gettext(msgid, context)
-        if msgval == msgid:
-            sep_idx = msgid.rfind(sep)
-            msgval = msgid[sep_idx+1:]
-        return msgval
+        return self.gettext(msgid, context)
 
     def lexgettext(self, msgid, context=''):
         """
@@ -1271,14 +1270,10 @@ class GrampsNullTranslations(gettext.NullTranslations):
         else:
             return gettext.NullTranslations.gettext(self, msgid)
 
-    def sgettext(self, msgid, context='', sep='|'):
+    def sgettext(self, msgid, context=''):
         if '\x04' in msgid: # Deferred translation
             context, msgid = msgid.split('\x04')
-        msgval = self.gettext(msgid, context)
-        if msgval == msgid:
-            sep_idx = msgid.rfind(sep)
-            msgval = msgid[sep_idx+1:]
-        return msgval
+        return self.gettext(msgid, context)
 
     lexgettext = sgettext
 
