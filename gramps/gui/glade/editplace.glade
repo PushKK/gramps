@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.18.3 -->
+<!-- Generated with glade 3.22.2 -->
 <interface>
   <requires lib="gtk+" version="3.10"/>
-  <requires lib="grampswidgets" version="0.0"/>
   <object class="GtkDialog" id="editplace">
     <property name="can_focus">False</property>
     <property name="type_hint">dialog</property>
+    <child type="titlebar">
+      <placeholder/>
+    </child>
     <child internal-child="vbox">
       <object class="GtkBox" id="dialog-vbox19">
         <property name="visible">True</property>
@@ -101,7 +103,7 @@
                 <child>
                   <object class="GtkLabel" id="comment1">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
+                    <property name="can_focus">False</property>
                     <property name="halign">start</property>
                     <property name="label" translatable="yes">Either use the two fields below to enter coordinates (latitude and longitude),</property>
                     <property name="hexpand">True</property>
@@ -375,7 +377,7 @@ You can set these values via the Geography View by searching the place, or via a
                   <object class="GtkComboBox" id="place_type">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="tooltip_text" translatable="yes">What type of place this is. Eg 'Country', 'City', ... .</property>
+                    <property name="tooltip_text" translatable="yes">What type of place this is. Eg 'Country', 'City', ...</property>
                     <property name="has_entry">True</property>
                     <child internal-child="entry">
                       <object class="GtkEntry" id="combobox-entry2">
