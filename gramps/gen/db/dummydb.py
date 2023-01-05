@@ -52,7 +52,6 @@ methods should be changed to generate exceptions. Possibly by globally changing
 #
 #-------------------------------------------------------------------------
 import logging
-import os
 import inspect
 from abc import ABCMeta
 from types import FunctionType
@@ -158,12 +157,15 @@ def wrapper(method):
         This 'wrapped' method logs the original function that was called, and
         where it was called from.
         """
-        class_name = args[0].__class__.__name__
-        func_name = method.__name__
-        caller_frame = inspect.stack()[1]
-        LOG.debug('calling %s.%s()... from file %s, line %s in %s',
-                  class_name, func_name, os.path.split(caller_frame[1])[1],
-                  caller_frame[2], caller_frame[3])
+        if __debug__ and LOG.isEnabledFor(logging.DEBUG):
+            class_name = args[0].__class__.__name__
+            func_name = method.__name__
+            frame = inspect.currentframe()
+            c_frame = frame.f_back
+            c_code = c_frame.f_code
+            LOG.debug('calling %s.%s()... from file %s, line %s in %s',
+                      class_name, func_name, c_code.co_filename,
+                      c_frame.f_lineno, c_code.co_name)
         return method(*args, **keywargs)
     return wrapped
 
@@ -287,7 +289,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
             result_list = list(find_backlink_handles(handle))
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         LOG.warning("handle %s does not exist in the dummy database", handle)
         return []
 
@@ -296,7 +298,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Returns first person in the database
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return None
 
     def find_next_event_gramps_id(self):
@@ -305,7 +307,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         event ID prefix.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return ""
 
     def find_next_family_gramps_id(self):
@@ -314,7 +316,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         family ID prefix.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return ""
 
     def find_next_note_gramps_id(self):
@@ -323,7 +325,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         note ID prefix.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return ""
 
     def find_next_media_gramps_id(self):
@@ -332,7 +334,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         off the media object ID prefix.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return ""
 
     def find_next_person_gramps_id(self):
@@ -341,7 +343,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         person ID prefix.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return ""
 
     def find_next_place_gramps_id(self):
@@ -350,7 +352,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         place ID prefix.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return ""
 
     def find_next_repository_gramps_id(self):
@@ -359,7 +361,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         off the repository ID prefix.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return ""
 
     def find_next_source_gramps_id(self):
@@ -368,7 +370,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         source ID prefix.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return ""
 
     def get_bookmarks(self):
@@ -376,7 +378,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return the list of Person handles in the bookmarks.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return self.bookmarks
 
     def get_child_reference_types(self):
@@ -385,7 +387,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         instances in the database.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def get_default_handle(self):
@@ -393,7 +395,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return the default Person of the database.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return None
 
     def get_default_person(self):
@@ -401,7 +403,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return the default Person of the database.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return None
 
     def get_event_bookmarks(self):
@@ -409,7 +411,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return the list of Event handles in the bookmarks.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return self.event_bookmarks
 
     def get_event_cursor(self):
@@ -417,7 +419,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return a reference to a cursor over event objects
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def get_event_from_gramps_id(self, val):
@@ -427,7 +429,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         If no such Event exists, None is returned.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         LOG.warning("gramps_id %s does not exist in the dummy database", val)
         return None
 
@@ -438,7 +440,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         If no such Event exists, a HandleError is raised.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         LOG.warning("handle %s does not exist in the dummy database", handle)
         return None
 
@@ -448,7 +450,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         database.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def get_event_roles(self):
@@ -457,7 +459,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         instances in the database.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def get_event_attribute_types(self):
@@ -466,7 +468,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         in the database.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def get_event_types(self):
@@ -474,7 +476,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return a list of all event types in the database.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def get_family_attribute_types(self):
@@ -483,7 +485,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         in the database.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def get_family_bookmarks(self):
@@ -491,7 +493,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return the list of Family handles in the bookmarks.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return self.family_bookmarks
 
     def get_family_cursor(self):
@@ -499,7 +501,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return a reference to a cursor over Family objects
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def get_family_event_types(self):
@@ -507,7 +509,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Deprecated:  Use get_event_types
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def get_family_from_gramps_id(self, val):
@@ -518,7 +520,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Need to be overridden by the derived class.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         LOG.warning("gramps_id %s does not exist in the dummy database", val)
         return None
 
@@ -529,7 +531,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         If no such Family exists, a HandleError is raised.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         LOG.warning("handle %s does not exist in the dummy database", handle)
         raise HandleError('Handle %s not found' % handle)
 
@@ -544,7 +546,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         :type locale: A GrampsLocale object.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def get_family_relation_types(self):
@@ -553,7 +555,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         instances in the database.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def get_media_attribute_types(self):
@@ -562,7 +564,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         instances in the database.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def get_media_bookmarks(self):
@@ -570,7 +572,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return the list of Media handles in the bookmarks.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return self.media_bookmarks
 
     def get_media_cursor(self):
@@ -578,7 +580,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return a reference to a cursor over Media objects
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def get_media_handles(self, sort_handles=False, locale=glocale):
@@ -592,7 +594,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         :type locale: A GrampsLocale object.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def get_mediapath(self):
@@ -600,7 +602,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return the default media path of the database.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return ""
 
     def get_name_group_keys(self):
@@ -608,7 +610,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return the defined names that have been assigned to a default grouping.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def get_name_group_mapping(self, surname):
@@ -616,7 +618,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return the default grouping name for a surname.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return ""
 
     def get_name_types(self):
@@ -625,7 +627,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         instances in the database.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def get_origin_types(self):
@@ -634,7 +636,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         instances in the database.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def get_note_bookmarks(self):
@@ -642,7 +644,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return the list of Note handles in the bookmarks.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return self.media_bookmarks
 
     def get_note_cursor(self):
@@ -650,7 +652,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return a reference to a cursor over Note objects
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def get_note_from_gramps_id(self, val):
@@ -660,7 +662,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         If no such Note exists, None is returned.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         LOG.warning("gramps_id %s does not exist in the dummy database", val)
         return None
 
@@ -671,7 +673,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         If no such Note exists, a HandleError is raised.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         LOG.warning("handle %s does not exist in the dummy database", handle)
         raise HandleError('Handle %s not found' % handle)
 
@@ -681,7 +683,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         database.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def get_note_types(self):
@@ -690,7 +692,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         in the database.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def get_number_of_events(self):
@@ -698,7 +700,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return the number of events currently in the database.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return 0
 
     def get_number_of_families(self):
@@ -706,7 +708,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return the number of families currently in the database.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return 0
 
     def get_number_of_media(self):
@@ -714,7 +716,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return the number of media objects currently in the database.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return 0
 
     def get_number_of_notes(self):
@@ -722,7 +724,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return the number of notes currently in the database.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return 0
 
     def get_number_of_people(self):
@@ -730,7 +732,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return the number of people currently in the database.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return 0
 
     def get_number_of_places(self):
@@ -738,7 +740,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return the number of places currently in the database.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return 0
 
     def get_number_of_repositories(self):
@@ -746,7 +748,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return the number of source repositories currently in the database.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return 0
 
     def get_number_of_sources(self):
@@ -754,7 +756,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return the number of sources currently in the database.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return 0
 
     def get_number_of_citations(self):
@@ -762,7 +764,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return the number of citations currently in the database.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return 0
 
     def get_number_of_tags(self):
@@ -770,7 +772,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return the number of tags currently in the database.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return 0
 
     def get_media_from_gramps_id(self, val):
@@ -780,7 +782,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         If no such Media exists, None is returned.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         LOG.warning("gramps_id %s does not exist in the dummy database", val)
         return None
 
@@ -791,7 +793,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         If no such Object exists, a HandleError is raised.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         LOG.warning("handle %s does not exist in the dummy database", handle)
         raise HandleError('Handle %s not found' % handle)
 
@@ -801,7 +803,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         in the database.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def get_person_cursor(self):
@@ -809,7 +811,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return a reference to a cursor over Person objects
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def get_person_event_types(self):
@@ -817,7 +819,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Deprecated:  Use get_event_types
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def get_person_from_gramps_id(self, val):
@@ -827,7 +829,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         If no such Person exists, None is returned.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         LOG.warning("gramps_id %s does not exist in the dummy database", val)
         return None
 
@@ -838,7 +840,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         If no such Person exists, a HandleError is raised.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         LOG.warning("handle %s does not exist in the dummy database", handle)
         raise HandleError('Handle %s not found' % handle)
 
@@ -853,7 +855,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         :type locale: A GrampsLocale object.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def get_source_attribute_types(self):
@@ -862,7 +864,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         instances in the database.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def get_place_bookmarks(self):
@@ -870,7 +872,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return the list of Place handles in the bookmarks.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return self.place_bookmarks
 
     def get_place_cursor(self):
@@ -878,7 +880,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return a reference to a cursor over Place objects
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def get_place_from_gramps_id(self, val):
@@ -888,7 +890,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         If no such Place exists, None is returned.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         LOG.warning("gramps_id %s does not exist in the dummy database", val)
         return None
 
@@ -899,7 +901,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         If no such Place exists, a HandleError is raised.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         LOG.warning("handle %s does not exist in the dummy database", handle)
         raise HandleError('Handle %s not found' % handle)
 
@@ -914,7 +916,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         :type locale: A GrampsLocale object.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def get_raw_event_data(self, handle):
@@ -922,7 +924,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return raw (serialized and pickled) Event object from handle
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         LOG.warning("handle %s does not exist in the dummy database", handle)
         raise HandleError('Handle %s not found' % handle)
 
@@ -931,7 +933,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return raw (serialized and pickled) Family object from handle
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         LOG.warning("handle %s does not exist in the dummy database", handle)
         raise HandleError('Handle %s not found' % handle)
 
@@ -940,7 +942,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return raw (serialized and pickled) Note object from handle
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         LOG.warning("handle %s does not exist in the dummy database", handle)
         raise HandleError('Handle %s not found' % handle)
 
@@ -949,7 +951,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return raw (serialized and pickled) Family object from handle
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         LOG.warning("handle %s does not exist in the dummy database", handle)
         raise HandleError('Handle %s not found' % handle)
 
@@ -958,7 +960,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return raw (serialized and pickled) Person object from handle
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         LOG.warning("handle %s does not exist in the dummy database", handle)
         raise HandleError('Handle %s not found' % handle)
 
@@ -967,7 +969,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return raw (serialized and pickled) Place object from handle
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         LOG.warning("handle %s does not exist in the dummy database", handle)
         raise HandleError('Handle %s not found' % handle)
 
@@ -976,7 +978,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return raw (serialized and pickled) Repository object from handle
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         LOG.warning("handle %s does not exist in the dummy database", handle)
         raise HandleError('Handle %s not found' % handle)
 
@@ -985,7 +987,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return raw (serialized and pickled) Source object from handle
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         LOG.warning("handle %s does not exist in the dummy database", handle)
         raise HandleError('Handle %s not found' % handle)
 
@@ -994,7 +996,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return raw (serialized and pickled) Citation object from handle
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         LOG.warning("handle %s does not exist in the dummy database", handle)
         raise HandleError('Handle %s not found' % handle)
 
@@ -1003,7 +1005,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return raw (serialized and pickled) Tag object from handle
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         LOG.warning("handle %s does not exist in the dummy database", handle)
         raise HandleError('Handle %s not found' % handle)
 
@@ -1012,7 +1014,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return the list of Repository handles in the bookmarks.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return self.repo_bookmarks
 
     def get_repository_cursor(self):
@@ -1020,7 +1022,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return a reference to a cursor over Repository objects
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def get_repository_from_gramps_id(self, val):
@@ -1030,7 +1032,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         If no such Repository exists, None is returned.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         LOG.warning("gramps_id %s does not exist in the dummy database", val)
         return None
 
@@ -1041,7 +1043,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         If no such Repository exists, a HandleError is raised.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         LOG.warning("handle %s does not exist in the dummy database", handle)
         raise HandleError('Handle %s not found' % handle)
 
@@ -1051,7 +1053,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         the database.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def get_repository_types(self):
@@ -1060,7 +1062,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         instances in the database.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def get_researcher(self):
@@ -1069,7 +1071,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         of the database.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return self.owner
 
     def get_save_path(self):
@@ -1083,7 +1085,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return the list of Source handles in the bookmarks.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return self.source_bookmarks
 
     def get_source_cursor(self):
@@ -1091,7 +1093,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return a reference to a cursor over Source objects
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def get_source_from_gramps_id(self, val):
@@ -1101,7 +1103,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         If no such Source exists, None is returned.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         LOG.warning("gramps_id %s does not exist in the dummy database", val)
         return None
 
@@ -1112,7 +1114,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         If no such Source exists, a HandleError is raised.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         LOG.warning("handle %s does not exist in the dummy database", handle)
         raise HandleError('Handle %s not found' % handle)
 
@@ -1127,7 +1129,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         :type locale: A GrampsLocale object.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def get_source_media_types(self):
@@ -1136,7 +1138,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         instances in the database.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def get_citation_bookmarks(self):
@@ -1144,7 +1146,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return the list of Citation handles in the bookmarks.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return self.citation_bookmarks
 
     def get_citation_cursor(self):
@@ -1152,7 +1154,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return a reference to a cursor over Citation objects
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def get_citation_from_gramps_id(self, val):
@@ -1162,7 +1164,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         If no such Citation exists, None is returned.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         LOG.warning("gramps_id %s does not exist in the dummy database", val)
         return None
 
@@ -1173,7 +1175,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         If no such Citation exists, a HandleError is raised.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         LOG.warning("handle %s does not exist in the dummy database", handle)
         raise HandleError('Handle %s not found' % handle)
 
@@ -1188,7 +1190,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         :type locale: A GrampsLocale object.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def get_surname_list(self):
@@ -1196,7 +1198,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return the list of locale-sorted surnames contained in the database.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def get_tag_cursor(self):
@@ -1204,7 +1206,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return a reference to a cursor over Tag objects
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def get_tag_from_handle(self, handle):
@@ -1214,7 +1216,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         If no such Tag exists, a HandleError is raised.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         LOG.warning("handle %s does not exist in the dummy database", handle)
         raise HandleError('Handle %s not found' % handle)
 
@@ -1225,7 +1227,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         If no such Tag exists, None is returned.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         LOG.warning("tag name %s does not exist in the dummy database", val)
         return None
 
@@ -1240,7 +1242,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         :type locale: A GrampsLocale object.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def get_url_types(self):
@@ -1249,7 +1251,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         in the database.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def get_place_types(self):
@@ -1258,7 +1260,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         in the database.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def has_event_handle(self, handle):
@@ -1266,7 +1268,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return True if the handle exists in the current Event database.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return False
 
     def has_family_handle(self, handle):
@@ -1274,7 +1276,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return True if the handle exists in the current Family database.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return False
 
     def has_name_group_key(self, name):
@@ -1282,7 +1284,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return if a key exists in the name_group table.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return False
 
     def has_note_handle(self, handle):
@@ -1290,7 +1292,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return True if the handle exists in the current Note database.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return False
 
     def has_media_handle(self, handle):
@@ -1298,7 +1300,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return True if the handle exists in the current Mediadatabase.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return False
 
     def has_person_handle(self, handle):
@@ -1306,7 +1308,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return True if the handle exists in the current Person database.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return False
 
     def has_place_handle(self, handle):
@@ -1314,7 +1316,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return True if the handle exists in the current Place database.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return False
 
     def has_repository_handle(self, handle):
@@ -1322,7 +1324,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return True if the handle exists in the current Repository database.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return False
 
     def has_source_handle(self, handle):
@@ -1330,7 +1332,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return True if the handle exists in the current Source database.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return False
 
     def has_tag_handle(self, handle):
@@ -1338,7 +1340,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return True if the handle exists in the current Tag database.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return False
 
     def is_open(self):
@@ -1352,7 +1354,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return an iterator over objects for Citations in the database
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def iter_event_handles(self):
@@ -1360,7 +1362,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return an iterator over handles for Events in the database
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def iter_events(self):
@@ -1368,7 +1370,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return an iterator over objects for Events in the database
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def iter_families(self):
@@ -1376,7 +1378,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return an iterator over objects for Families in the database
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def iter_family_handles(self):
@@ -1384,7 +1386,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return an iterator over handles for Families in the database
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def iter_media_handles(self):
@@ -1392,7 +1394,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return an iterator over handles for Media in the database
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def iter_media(self):
@@ -1400,7 +1402,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return an iterator over objects for Medias in the database
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def iter_note_handles(self):
@@ -1408,7 +1410,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return an iterator over handles for Notes in the database
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def iter_notes(self):
@@ -1416,7 +1418,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return an iterator over objects for Notes in the database
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def iter_people(self):
@@ -1424,7 +1426,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return an iterator over objects for Persons in the database
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def iter_person_handles(self):
@@ -1432,7 +1434,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return an iterator over handles for Persons in the database
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def iter_place_handles(self):
@@ -1440,7 +1442,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return an iterator over handles for Places in the database
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def iter_places(self):
@@ -1448,7 +1450,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return an iterator over objects for Places in the database
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def iter_repositories(self):
@@ -1456,7 +1458,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return an iterator over objects for Repositories in the database
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def iter_repository_handles(self):
@@ -1464,7 +1466,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return an iterator over handles for Repositories in the database
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def iter_source_handles(self):
@@ -1472,7 +1474,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return an iterator over handles for Sources in the database
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def iter_sources(self):
@@ -1480,7 +1482,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return an iterator over objects for Sources in the database
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def iter_tag_handles(self):
@@ -1488,7 +1490,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return an iterator over handles for Tags in the database
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def iter_tags(self):
@@ -1496,7 +1498,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Return an iterator over objects for Tags in the database
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return []
 
     def load(self, name, callback=None, mode=None, force_schema_upgrade=False,
@@ -1514,8 +1516,8 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Add 1 to the number of bookmark changes during this session.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
-        LOG.warning("databse is readonly")
+            LOG.debug("database is closed")
+        LOG.warning("database is readonly")
 
     def request_rebuild(self):
         """
@@ -1528,15 +1530,15 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
                   single database-rebuild signal.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
-        LOG.warning("databse is readonly")
+            LOG.debug("database is closed")
+        LOG.warning("database is readonly")
 
     def version_supported(self):
         """
         Return True when the file has a supported version.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
         return True
 
     def set_event_id_prefix(self, val):
@@ -1547,7 +1549,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         in a format that contains a C/Python style format string using %d,
         such as E%d or E%04d.
         """
-        LOG.warning("databse is readonly")
+        LOG.warning("database is readonly")
 
     def set_family_id_prefix(self, val):
         """
@@ -1556,7 +1558,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         that contains a C/Python style format string using %d, such as F%d
         or F%04d.
         """
-        LOG.warning("databse is readonly")
+        LOG.warning("database is readonly")
 
     def set_note_id_prefix(self, val):
         """
@@ -1566,7 +1568,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         in a format that contains a C/Python style format string using %d,
         such as N%d or N%04d.
         """
-        LOG.warning("databse is readonly")
+        LOG.warning("database is readonly")
 
     def set_media_id_prefix(self, val):
         """
@@ -1576,7 +1578,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         in a format that contains a C/Python style format string using %d,
         such as O%d or O%04d.
         """
-        LOG.warning("databse is readonly")
+        LOG.warning("database is readonly")
 
     def set_person_id_prefix(self, val):
         """
@@ -1586,7 +1588,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         in a format that contains a C/Python style format string using %d,
         such as I%d or I%04d.
         """
-        LOG.warning("databse is readonly")
+        LOG.warning("database is readonly")
 
     def set_place_id_prefix(self, val):
         """
@@ -1596,14 +1598,14 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         in a format that contains a C/Python style format string using %d,
         such as P%d or P%04d.
         """
-        LOG.warning("databse is readonly")
+        LOG.warning("database is readonly")
 
     def set_prefixes(self, person, media, family, source, citation,
                      place, event, repository, note):
         """
         Set the prefixes for the gramps ids for all gramps objects
         """
-        LOG.warning("databse is readonly")
+        LOG.warning("database is readonly")
 
     def set_repository_id_prefix(self, val):
         """
@@ -1613,7 +1615,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         in a format that contains a C/Python style format string using %d,
         such as R%d or R%04d.
         """
-        LOG.warning("databse is readonly")
+        LOG.warning("database is readonly")
 
     def set_source_id_prefix(self, val):
         """
@@ -1623,21 +1625,21 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         in a format that contains a C/Python style format string using %d,
         such as S%d or S%04d.
         """
-        LOG.warning("databse is readonly")
+        LOG.warning("database is readonly")
 
     def set_mediapath(self, path):
         """
         Set the default media path for database.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
 
     def set_researcher(self, owner):
         """
         Set the information about the owner of the database.
         """
         if not self.db_is_open:
-            LOG.warning("database is closed")
+            LOG.debug("database is closed")
 
     def get_dbid(self):
         """
