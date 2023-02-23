@@ -60,6 +60,7 @@ from gramps.gen.plug.report import utils
 from gramps.gen.utils.alive import probably_alive
 from gramps.gen.constfunc import win
 from gramps.gen.display.name import displayer as _nd
+from gramps.gen.display.place import displayer as _pd
 from gramps.gen.utils.db import get_birth_or_fallback, get_death_or_fallback
 from gramps.plugins.lib.libhtml import Html
 from gramps.gen.utils.place import conv_lat_lon
@@ -70,16 +71,15 @@ from gramps.gen.relationship import get_relationship_calculator
 # specific narrative web import
 #------------------------------------------------
 from gramps.plugins.webreport.basepage import BasePage
-from gramps.plugins.webreport.common import (get_first_letters, _KEYPERSON,
-                                             alphabet_navigation, sort_people,
-                                             first_letter,
-                                             get_index_letter, add_birthdate,
-                                             primary_difference, FULLCLEAR,
+from gramps.plugins.webreport.common import (alphabet_navigation,
+                                             add_birthdate, FULLCLEAR,
                                              _find_birth_date, _find_death_date,
                                              MARKER_PATH, OPENLAYER,
                                              OSM_MARKERS, STAMEN_MARKERS,
                                              GOOGLE_MAPS, MARKERS, html_escape,
-                                             DROPMASTERS, FAMILYLINKS)
+                                             DROPMASTERS, FAMILYLINKS,
+                                             get_surname_from_person,
+                                             AlphabeticIndex)
 from gramps.plugins.webreport.layout import LayoutTree
 from gramps.plugins.webreport.buchheim import buchheim
 
@@ -166,6 +166,139 @@ class PersonPages(BasePage):
 #    creates the Individual List Page
 #
 #################################################
+
+    def __output_person(self, date, tbody, bucket_letter, bucket_link,
+                        showbirth, showdeath, showpartner, showparents,
+                        surname, surnamed, first_surname, first_individual,
+                        person_handle):
+        """
+        Generate and output the data for a single person
+        """
+        person = self.r_db.get_person_from_handle(person_handle)
+        if person.get_change_time() > date:
+            date = person.get_change_time()
+        # surname column
+        trow = Html("tr")
+        tbody += trow
+        tcell = Html("td", class_="ColumnSurname", inline=True)
+        trow += tcell
+        if first_surname:
+            first_surname = False
+            first_individual = False
+            trow.attr = 'class = "BeginSurname"'
+            ttle = self._("Surnames %(surname)s beginning "
+                          "with letter %(letter)s" %
+                          {'surname':surname, 'letter':bucket_letter})
+            tcell += Html("a", html_escape(surnamed), name=bucket_letter,
+                          id_=bucket_link, title=ttle)
+        elif first_individual:
+            first_individual = False
+            tcell += Html("a", html_escape(surnamed),
+                          title=self._("Surnames") + " " + surname)
+        else:
+            tcell += "&nbsp;"
+        # firstname column
+        link = self.new_person_link(person_handle, person=person)
+        trow += Html("td", link, class_="ColumnName")
+        # birth column
+        if showbirth:
+            tcell = Html("td", class_="ColumnBirth", inline=True)
+            trow += tcell
+            birth_date = _find_birth_date(self.r_db, person)
+            if birth_date is not None:
+                if birth_date.fallback:
+                    tcell += Html('em', self.rlocale.get_date(birth_date),
+                                  inline=True)
+                else:
+                    tcell += self.rlocale.get_date(birth_date)
+            else:
+                tcell += "&nbsp;"
+        # death column
+        if showdeath:
+            tcell = Html("td", class_="ColumnDeath", inline=True)
+            trow += tcell
+            death_date = _find_death_date(self.r_db, person)
+            if death_date is not None:
+                if death_date.fallback:
+                    tcell += Html('em', self.rlocale.get_date(death_date),
+                                  inline=True)
+                else:
+                    tcell += self.rlocale.get_date(death_date)
+            else:
+                tcell += "&nbsp;"
+        # partner column
+        if showpartner:
+            family_list = person.get_family_handle_list()
+            first_family = True
+            #partner_name = None
+            tcell = ()
+            if family_list:
+                for family_handle in family_list:
+                    family = self.r_db.get_family_from_handle(family_handle)
+                    partner_handle = utils.find_spouse(
+                        person, family)
+                    if partner_handle:
+                        if not first_family:
+                            # have to do this to get the comma on
+                            # the same line as the link
+                            if isinstance(tcell[-1], Html):
+                                # tcell is an instance of Html (or
+                                # of a subclass thereof)
+                                tcell[-1].inside += ","
+                            else:
+                                tcell = tcell[:-1] + (
+                                        # TODO for Arabic, translate?
+                                        (tcell[-1] + ", "), )
+                        # Have to manipulate as tuples so that
+                        # subsequent people are not nested
+                        # within the first link
+                        tcell += (self.new_person_link(partner_handle),)
+                        first_family = False
+
+            else:
+                tcell = "&nbsp;"
+            trow += Html("td", class_="ColumnPartner") + tcell
+        # parents column
+        if showparents:
+            parent_hdl_list = person.get_parent_family_handle_list()
+            if parent_hdl_list:
+                parent_handle = parent_hdl_list[0]
+                family = self.r_db.get_family_from_handle(parent_handle)
+                father_handle = family.get_father_handle()
+                mother_handle = family.get_mother_handle()
+                if father_handle:
+                    father = self.r_db.get_person_from_handle(father_handle)
+                else:
+                    father = None
+                if mother_handle:
+                    mother = self.r_db.get_person_from_handle(mother_handle)
+                else:
+                    mother = None
+                if father:
+                    father_name = self.get_name(father)
+                if mother:
+                    mother_name = self.get_name(mother)
+                samerow = False
+                if mother and father:
+                    tcell = (Html("span", father_name,
+                                  class_="father fatherNmother", inline=True),
+                             Html("span", mother_name,
+                                  class_="mother", inline=True))
+                elif mother:
+                    tcell = Html("span", mother_name, class_="mother",
+                                 inline=True)
+                elif father:
+                    tcell = Html("span", father_name, class_="father",
+                                 inline=True)
+                else:
+                    tcell = "&nbsp;"
+                    samerow = True
+            else:
+                tcell = "&nbsp;"
+                samerow = True
+            trow += Html("td", class_="ColumnParents", inline=samerow) + tcell
+        return (date, first_surname, first_individual)
+
     def individuallistpage(self, report, the_lang, the_title, ppl_handle_list):
         """
         Creates an individual page
@@ -178,7 +311,6 @@ class PersonPages(BasePage):
                                    to create a page.
         """
         BasePage.__init__(self, report, the_lang, the_title)
-        prev_letter = " "
 
         # plugin variables for this module
         showbirth = report.options['showbirth']
@@ -204,8 +336,27 @@ class PersonPages(BasePage):
             individuallist += Html("p", msg, id="description")
 
             # add alphabet navigation
-            index_list = get_first_letters(self.r_db, ppl_handle_list,
-                                           _KEYPERSON, rlocale=self.rlocale)
+            # Assemble all the handles for each surname into a dictionary
+            # We don't call sort_people because we don't care about sorting
+            # individuals, only surnames
+            surname_handle_dict = defaultdict(list)
+            for person_handle in ppl_handle_list:
+                person = self.r_db.get_person_from_handle(person_handle)
+                surname = get_surname_from_person(self.r_db, person)
+                surname_handle_dict[surname].append(person_handle)
+
+            # Assemble the alphabeticIndex
+            index = AlphabeticIndex(self.rlocale)
+            for surname, handle_list in surname_handle_dict.items():
+                index.addRecord(surname, handle_list)
+
+            # Extract the buckets from the index
+            index_list = []
+            index.resetBucketIterator()
+            while index.nextBucket():
+                if index.bucketRecordCount != 0:
+                    index_list.append(index.bucketLabel)
+            # Output the navigation
             alpha_nav = alphabet_navigation(index_list, self.rlocale)
             if alpha_nav is not None:
                 individuallist += alpha_nav
@@ -247,179 +398,57 @@ class PersonPages(BasePage):
             tbody = Html("tbody")
             table += tbody
 
-            ppl_handle_list = sort_people(self.r_db, ppl_handle_list,
-                                          self.rlocale)
-            first = True
-            name_format = self.report.options['name_format']
-            nme_format = _nd.name_formats[name_format][1]
-            for (surname, handle_list) in ppl_handle_list:
+            # for each bucket, output the surnames in that bucket
+            index.resetBucketIterator()
+            output = []
+            dup_index = 0
+            while index.nextBucket():
+                if index.bucketRecordCount != 0:
+                    surname_handle_dict = defaultdict(list)
+                    bucket_letter = index.bucketLabel
+                    bucket_link = bucket_letter
+                    if bucket_letter in output:
+                        bucket_link = "%s (%i)" % (bucket_letter, dup_index)
+                        dup_index += 1
+                    output.append(bucket_letter)
+                    while index.nextRecord():
+                        surname = index.recordName
+                        handle_list = index.recordData
+                        for handle in handle_list:
+                            surname_handle_dict[surname].append(handle)
+                    surname_handle_list = list(surname_handle_dict.items())
+                    # sort by surname
+                    surname_handle_list.sort(key=lambda x:
+                                             self.rlocale.sort_key(x[0]))
 
-                if surname and not surname.isspace():
-                    letter = get_index_letter(first_letter(surname), index_list,
-                                              self.rlocale)
-                else:
-                    letter = '&nbsp'
-                    surname = self._("<absent>")
+                    name_format = self.report.options['name_format']
+                    nme_format = _nd.name_formats[name_format][1]
+                    for (surname, handle_list) in surname_handle_list:
+                        if not surname or surname.isspace():
+                            surname = self._("<absent>")
 
-                # In case the user choose a format name like "*SURNAME*"
-                # We must display this field in upper case. So we use the
-                # english format of format_name to find if this is the case.
-                # name_format = self.report.options['name_format']
-                # nme_format = _nd.name_formats[name_format][1]
-                if "SURNAME" in nme_format:
-                    surnamed = surname.upper()
-                else:
-                    surnamed = surname
-                first_surname = True
-                for person_handle in sorted(handle_list,
-                                            key=self.sort_on_name_and_grampsid):
-                    person = self.r_db.get_person_from_handle(person_handle)
-                    if person.get_change_time() > date:
-                        date = person.get_change_time()
-
-                    # surname column
-                    trow = Html("tr")
-                    tbody += trow
-                    tcell = Html("td", class_="ColumnSurname", inline=True)
-                    trow += tcell
-
-                    if first or primary_difference(letter, prev_letter,
-                                                   self.rlocale):
-                        first = False
-                        first_surname = False
-                        prev_letter = letter
-                        trow.attr = 'class = "BeginSurname"'
-                        ttle = self._("Surnames %(surname)s beginning "
-                                      "with letter %(letter)s" %
-                                      {'surname' : surname,
-                                       'letter' : letter})
-                        tcell += Html(
-                            "a", html_escape(surnamed), name=letter,
-                            id_=letter,
-                            title=ttle)
-                    elif first_surname:
-                        first_surname = False
-                        tcell += Html("a", html_escape(surnamed),
-                                      title=self._("Surnames") + " " + surname)
-                    else:
-                        tcell += "&nbsp;"
-
-                    # firstname column
-                    link = self.new_person_link(person_handle, person=person)
-                    trow += Html("td", link, class_="ColumnName")
-
-                    # birth column
-                    if showbirth:
-                        tcell = Html("td", class_="ColumnBirth", inline=True)
-                        trow += tcell
-
-                        birth_date = _find_birth_date(self.r_db, person)
-                        if birth_date is not None:
-                            if birth_date.fallback:
-                                tcell += Html('em',
-                                              self.rlocale.get_date(birth_date),
-                                              inline=True)
-                            else:
-                                tcell += self.rlocale.get_date(birth_date)
+                        # In case the user choose a format name like "*SURNAME*"
+                        # We must display this field in upper case. So we use
+                        # the english format of format_name to find if this is
+                        # the case. name_format =
+                        # self.report.options['name_format'] nme_format =
+                        # _nd.name_formats[name_format][1]
+                        if "SURNAME" in nme_format:
+                            surnamed = surname.upper()
                         else:
-                            tcell += "&nbsp;"
-
-                    # death column
-                    if showdeath:
-                        tcell = Html("td", class_="ColumnDeath", inline=True)
-                        trow += tcell
-
-                        death_date = _find_death_date(self.r_db, person)
-                        if death_date is not None:
-                            if death_date.fallback:
-                                tcell += Html('em',
-                                              self.rlocale.get_date(death_date),
-                                              inline=True)
-                            else:
-                                tcell += self.rlocale.get_date(death_date)
-                        else:
-                            tcell += "&nbsp;"
-
-                    # partner column
-                    if showpartner:
-
-                        family_list = person.get_family_handle_list()
-                        first_family = True
-                        #partner_name = None
-                        tcell = ()
-                        if family_list:
-                            for family_handle in family_list:
-                                family = self.r_db.get_family_from_handle(
-                                    family_handle)
-                                partner_handle = utils.find_spouse(
-                                    person, family)
-                                if partner_handle:
-                                    if not first_family:
-                                        # have to do this to get the comma on
-                                        # the same line as the link
-                                        if isinstance(tcell[-1], Html):
-                                            # tcell is an instance of Html (or
-                                            # of a subclass thereof)
-                                            tcell[-1].inside += ","
-                                        else:
-                                            tcell = tcell[:-1] + (
-                                                # TODO for Arabic, translate?
-                                                (tcell[-1] + ", "),)
-                                    # Have to manipulate as tuples so that
-                                    # subsequent people are not nested
-                                    # within the first link
-                                    tcell += (
-                                        self.new_person_link(partner_handle),)
-                                    first_family = False
-                        else:
-                            tcell = "&nbsp;"
-                        trow += Html("td", class_="ColumnPartner") + tcell
-
-                    # parents column
-                    if showparents:
-
-                        parent_hdl_list = person.get_parent_family_handle_list()
-                        if parent_hdl_list:
-                            parent_handle = parent_hdl_list[0]
-                            family = self.r_db.get_family_from_handle(
-                                parent_handle)
-                            father_handle = family.get_father_handle()
-                            mother_handle = family.get_mother_handle()
-                            if father_handle:
-                                father = self.r_db.get_person_from_handle(
-                                    father_handle)
-                            else:
-                                father = None
-                            if mother_handle:
-                                mother = self.r_db.get_person_from_handle(
-                                    mother_handle)
-                            else:
-                                mother = None
-                            if father:
-                                father_name = self.get_name(father)
-                            if mother:
-                                mother_name = self.get_name(mother)
-                            samerow = False
-                            if mother and father:
-                                tcell = (Html("span", father_name,
-                                              class_="father fatherNmother",
-                                              inline=True),
-                                         Html("span", mother_name,
-                                              class_="mother", inline=True))
-                            elif mother:
-                                tcell = Html("span", mother_name,
-                                             class_="mother", inline=True)
-                            elif father:
-                                tcell = Html("span", father_name,
-                                             class_="father", inline=True)
-                            else:
-                                tcell = "&nbsp;"
-                                samerow = True
-                        else:
-                            tcell = "&nbsp;"
-                            samerow = True
-                        trow += Html("td", class_="ColumnParents",
-                                     inline=samerow) + tcell
+                            surnamed = surname
+                        first_surname = True
+                        first_individual = True
+                        for person_handle in sorted(handle_list,
+                                        key=self.sort_on_name_and_grampsid):
+                            (date, first_surname, first_individual) \
+                            = self.__output_person(date, tbody, bucket_letter,
+                                                   bucket_link, showbirth,
+                                                   showdeath, showpartner,
+                                                   showparents, surname,
+                                                   surnamed, first_surname,
+                                                   first_individual,
+                                                   person_handle)
 
         # create clear line for proper styling
         # create footer section
@@ -481,7 +510,7 @@ class PersonPages(BasePage):
         output_file, sio = self.report.create_file(person.get_handle(), "ppl")
         self.uplink = True
         result = self.write_header(self.sort_name)
-        indivdetpage, dummy_head, dummy_body, outerwrapper = result
+        indivdetpage, head, dummy_body, outerwrapper = result
 
         # begin individualdetail division
         with Html("div", class_="content",
@@ -558,6 +587,18 @@ class PersonPages(BasePage):
                         media_list += event.get_media_list()
 
             # display additional images as gallery
+            if photo_list and self.create_media:
+                if self.the_lang and not self.usecms:
+                    fname = "/".join(["..", "css", "lightbox.css"])
+                    jsname = "/".join(["..", "css", "lightbox.js"])
+                else:
+                    fname = "/".join(["css", "lightbox.css"])
+                    jsname = "/".join(["css", "lightbox.js"])
+                url = self.report.build_url_fname(fname, None, self.uplink)
+                head += Html("link", href=url, type="text/css",
+                             media="screen", rel="stylesheet")
+                url = self.report.build_url_fname(jsname, None, self.uplink)
+                head += Html("script", src=url, type="text/javascript", inline=True)
             sect7 = self.disp_add_img_as_gallery(media_list, person)
             if sect7 is not None:
                 individualdetail += sect7
@@ -660,6 +701,60 @@ class PersonPages(BasePage):
                                 placetitle.replace("'", "\\'"), links)
         return tracelife
 
+    def __create_links_tracelife(self, links, person, placetitle,
+                                 latitude, longitude, ref,
+                                 event):
+        """
+        creates individual family events for a marker
+
+        @param: links      -- Used to add links in the popup html page
+        @param: person     -- family for this person
+        @param: placetitle -- The place title to add to the event list
+        @param: latitude   -- The latitude for this place
+        @param: longitude  -- The longitude for this place
+        @param: event      -- The event for which we are working
+        @param: ref        -- The back reference and role for the event
+        """
+        if not person:
+            return links
+        url_fct = self.report.build_url_fname_html
+        ppl_fct = self.r_db.get_person_from_handle
+        ln_str = "<a href='%s' title='%s' target='_self'>%s</a>"
+        ppl_lnk = ""
+        (bkref_class, bkref_hdle, role) = ref
+        if role == "Marriage" or role == "Divorce" or role == "Family":
+            url = url_fct(bkref_hdle,
+                          "fam", self.uplink)
+            fam_fct = self.r_db.get_family_from_handle
+            fam = fam_fct(bkref_hdle)
+            fam_name = self.report.get_family_name(fam)
+            ppl_lnk = ln_str % (url,
+                                fam.get_gramps_id(),
+                                fam_name)
+            if "<p>" in links:
+                links += ' + "<br>%s"' % ppl_lnk
+            else:
+                links = '"<p>%s"' % ppl_lnk
+        elif bkref_class == Person:  # and role == "Primary":
+            pers = ppl_fct(bkref_hdle)
+            url = url_fct(bkref_hdle, "ppl", self.uplink)
+            ppl_lnk = ln_str % (url,
+                                pers.get_gramps_id(),
+                                self.get_name(pers))
+            ppl_lnk = ln_str % (url,
+                                pers.get_gramps_id(),
+                                self.get_name(pers))
+            evt_type = self._(event.get_type().xml_str())
+            evt_date = self.rlocale.get_date(event.get_date_object())
+            url = url_fct(event.get_handle(), "evt", self.uplink)
+            evt_lnk = ln_str % (url, evt_date, evt_type)
+            evt_lnk += " (" + evt_date + ")"
+            if "<p>" in links:
+                links += ' + "<br>%s"' % (ppl_lnk+self._(":") + evt_lnk)
+            else:
+                links = '"<p>%s"' % (ppl_lnk + self._(":") + evt_lnk)
+        return links
+
     def __create_family_map(self, person, place_lat_long):
         """
         creates individual family map page
@@ -752,10 +847,25 @@ class PersonPages(BasePage):
             src_js += "ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"
             head += Html("script", type="text/javascript",
                          src=src_js, inline=True)
-            src_js = "https://openlayers.org/en/latest/build/ol.js"
+            olv = self.report.options['ol_version']
+            build = "legacy"
+            if olv < "v7.0.0":
+                build = "build"
+            if olv == "latest":
+                build = "legacy"
+            src_js = ("https://openlayers.org/en/"
+                      "%(ver)s/%(bld)s/ol.js") % {"ver" : olv,
+                                                  "bld": build}
             head += Html("script", type="text/javascript",
                          src=src_js, inline=True)
-            url = "https://openlayers.org/en/latest/css/ol.css"
+            css = "legacy"
+            if olv < "v7.0.0":
+                css = "css"
+            if olv == "latest":
+                css = "legacy"
+            url = ("https://openlayers.org/en/"
+                   "%(ver)s/%(css)s/ol.css") % {"ver" : olv,
+                                                "css": css}
             head += Html("link", href=url, type="text/css",
                          rel="stylesheet")
 
@@ -764,149 +874,54 @@ class PersonPages(BasePage):
             seq_ = 0
             old_place_title = ""
             links = "''"
-            ln_str = "<a href='%s' title='%s' target='_self'>%s</a>"
-            ppl_lnk = ""
             for index in range(0, number_markers):
                 (latitude, longitude, placetitle, handle,
                  event) = place_lat_long[index]
                 # Do we have several events for this place?
-                if placetitle == old_place_title:
-                    evthdle = event.get_handle()
-                    bkref_list = self.report.bkref_dict[Event][evthdle]
-                    url_fct = self.report.build_url_fname_html
-                    if bkref_list:
+                evthdle = event.get_handle()
+                bkref_list = self.report.bkref_dict[Event][evthdle]
+                if bkref_list:
+                    if placetitle == old_place_title:
                         for ref in bkref_list:
-                            (bkref_class, bkref_hdle, role) = ref
-                            if bkref_class == Family and role == "Primary":
-                                url = url_fct(bkref_hdle,
-                                              "fam", self.uplink)
-                                fam_fct = self.r_db.get_family_from_handle
-                                fam = fam_fct(bkref_hdle)
-                                fam_name = self.report.get_family_name(fam)
-                                ppl_lnk = ln_str % (url,
-                                                    fam.get_gramps_id(),
-                                                    fam_name)
-                            if bkref_class == Person and role == "Primary":
-                                url = url_fct(bkref_hdle,
-                                              "ppl", self.uplink)
-                                ppl_fct = self.r_db.get_person_from_handle
-                                pers = ppl_fct(bkref_hdle)
-                                ppl_lnk = ln_str % (url,
-                                                    pers.get_gramps_id(),
-                                                    self.get_name(pers))
-                    url = self.report.build_url_fname_html(event.get_handle(),
-                                                           "evt", self.uplink)
-                    evt_type = self._(event.get_type().xml_str())
-                    evt_date = self.rlocale.get_date(event.get_date_object())
-                    evt_lnk = ln_str % (url, evt_date, evt_type)
-                    evt_lnk += " (" + evt_date + ")"
-
-                    links += ' + "<br>%s"' % (ppl_lnk + self._(":") + evt_lnk)
-                    if index == number_markers - 1:
+                            links = self.__create_links_tracelife(
+                                        links, person, placetitle,
+                                        latitude, longitude, ref,
+                                        event)
+                        # break
+                    # continue
+                    elif old_place_title != "" and index != 0:
+                        (lat, lng, plcetitle, dummy_handle,
+                         dummy_event) = place_lat_long[index-1]
                         tracelife = self._create_family_tracelife(tracelife,
-                                                                  placetitle,
-                                                                  latitude,
-                                                                  longitude,
-                                                                  seq_,
-                                                                  links)
-                        break
-                    continue
-                elif old_place_title != "" and index != 0:
-                    (lat, lng, plcetitle, dummy_handle,
-                     dummy_event) = place_lat_long[index-1]
-                    tracelife = self._create_family_tracelife(tracelife,
-                                                              plcetitle,
+                                                              old_place_title,
                                                               lat,
                                                               lng,
                                                               seq_,
                                                               links)
-                    if old_place_title != placetitle:
                         old_place_title = placetitle
-                        evthdle = event.get_handle()
-                        bkref_list = self.report.bkref_dict[Event][evthdle]
-                        url_fct = self.report.build_url_fname_html
-                        if bkref_list:
-                            for ref in bkref_list:
-                                (bkref_class, bkref_hdle, role) = ref
-                                if bkref_class == Family and role == "Primary":
-                                    url = url_fct(bkref_hdle,
-                                                  "fam", self.uplink)
-                                    fam_fct = self.r_db.get_family_from_handle
-                                    fam = fam_fct(bkref_hdle)
-                                    fam_name = self.report.get_family_name(fam)
-                                    ppl_lnk = ln_str % (url,
-                                                        fam.get_gramps_id(),
-                                                        fam_name)
-                                if bkref_class == Person and role == "Primary":
-                                    url = url_fct(bkref_hdle,
-                                                  "ppl", self.uplink)
-                                    ppl_fct = self.r_db.get_person_from_handle
-                                    pers = ppl_fct(bkref_hdle)
-                                    ppl_lnk = ln_str % (url,
-                                                        pers.get_gramps_id(),
-                                                        self.get_name(pers))
-                        url = self.report.build_url_fname_html(event.handle,
-                                                               "evt",
-                                                               self.uplink)
-                        evt_type = self._(event.get_type().xml_str())
-                        date = self.rlocale.get_date(event.get_date_object())
-                        evt_lnk = ln_str % (url, date, evt_type)
-                        evt_lnk += " (" + date + ")"
-
-                        links = '"<br>%s"' % (ppl_lnk + self._(":") + evt_lnk)
-                elif index == number_markers-1:
-                    tracelife = self._create_family_tracelife(tracelife,
-                                                              placetitle,
-                                                              latitude,
-                                                              longitude,
-                                                              seq_,
-                                                              links)
-                else:
-                    evthdle = event.get_handle()
-                    bkref_list = self.report.bkref_dict[Event][evthdle]
-                    url_fct = self.report.build_url_fname_html
-                    if bkref_list:
+                        links = "''"
                         for ref in bkref_list:
                             (bkref_class, bkref_hdle, role) = ref
-                            if bkref_class == Family and role == "Primary":
-                                url = url_fct(bkref_hdle,
-                                              "fam", self.uplink)
-                                fam_fct = self.r_db.get_family_from_handle
-                                fam = fam_fct(bkref_hdle)
-                                fam_name = self.report.get_family_name(fam)
-                                ppl_lnk = ln_str % (url,
-                                                    fam.get_gramps_id(),
-                                                    fam_name)
-                            if bkref_class == Person and role == "Primary":
-                                url = url_fct(bkref_hdle,
-                                              "ppl", self.uplink)
-                                ppl_fct = self.r_db.get_person_from_handle
-                                pers = ppl_fct(bkref_hdle)
-                                ppl_lnk = ln_str % (url,
-                                                    pers.get_gramps_id(),
-                                                    self.get_name(pers))
-                        url = self.report.build_url_fname_html(event.handle,
-                                                               "evt",
-                                                               self.uplink)
-                        evt_type = self._(event.get_type().xml_str())
-                        date = self.rlocale.get_date(event.get_date_object())
-                        evt_lnk = ln_str % (url, evt_type, evt_type)
-                        evt_lnk += " (" + date + ")"
-                    if "<p>" in links:
-                        links += '"<br>%s"' % (ppl_lnk+self._(":") + evt_lnk)
+                            links = self.__create_links_tracelife(
+                                        links, person, placetitle,
+                                        latitude, longitude, ref,
+                                        event)
                     else:
-                        links = '"<p>%s"' % (ppl_lnk + self._(":") + evt_lnk)
+                        for ref in bkref_list:
+                            (bkref_class, bkref_hdle, role) = ref
+                            links = self.__create_links_tracelife(
+                                           links, person, placetitle,
+                                           latitude, longitude, ref,
+                                           event)
                     old_place_title = placetitle
                 seq_ += 1
+            tracelife = self._create_family_tracelife(tracelife,
+                                                  placetitle,
+                                                  latitude, longitude,
+                                                  seq_, links)
 
-        (lat, lng, plcetitle, dummy_handle,
-         dummy_event) = place_lat_long[number_markers-1]
-        tracelife = self._create_family_tracelife(tracelife,
-                                                  plcetitle,
-                                                  lat,
-                                                  lng,
-                                                  seq_,
-                                                  links)
+        # (lat, lng, plcetitle, dummy_handle,
+        #  dummy_event) = place_lat_long[number_markers-1]
         tracelife += "];"
         # begin MapDetail division...
         with Html("div", class_="content", id="FamilyMapDetail") as mapdetail:
@@ -920,8 +935,8 @@ class PersonPages(BasePage):
 
             # page description
             msg = self._("This map page represents that person "
-                         "and any descendants with all of their event/ places. "
-                         "If you place your mouse over "
+                         "and any descendants with all of their event/places."
+                         " If you place your mouse over "
                          "the marker it will display the place name. "
                          "The markers and the Reference "
                          "list are sorted in date order (if any?). "
@@ -1683,10 +1698,19 @@ class PersonPages(BasePage):
                 # Age At Death???
                 birth_date = Date.EMPTY
                 birth_ref = self.person.get_birth_ref()
+                p_birth = ""
                 if birth_ref:
                     birth = self.r_db.get_event_from_handle(birth_ref.ref)
                     if birth:
                         birth_date = birth.get_date_object()
+                        p_birth = _pd.display_event(self.r_db, birth)
+
+                death_ref = self.person.get_death_ref()
+                p_death = ""
+                if death_ref:
+                    death = self.r_db.get_event_from_handle(death_ref.ref)
+                    if death:
+                        p_death = _pd.display_event(self.r_db, death)
 
                 death_date = _find_death_date(self.r_db, self.person)
                 if birth_date and birth_date is not Date.EMPTY:
@@ -1705,11 +1729,26 @@ class PersonPages(BasePage):
                         table += trow
                 if self.report.options['toggle']:
                     # Show birth and/or death date if we use the close button.
+                    # If we have associated places, show them.
+                    if p_birth:
+                        p_birth = "%(bdat)s (%(pbirth)s)" % {
+                            'bdat': self.rlocale.get_date(birth_date),
+                            'pbirth': p_birth
+                            }
+                    elif birth_ref and birth:
+                        p_birth = self.rlocale.get_date(birth_date)
+                    if p_death:
+                        p_death = "%(ddat)s (%(pdeath)s)" % {
+                            'ddat': self.rlocale.get_date(death_date),
+                            'pdeath': p_death
+                            }
+                    elif death_ref and death:
+                        p_death = self.rlocale.get_date(death_date)
                     if birth_date and birth_date is not Date.EMPTY:
                         trow = Html("tr") + (
                             Html("td", self._("Birth date"),
                                  class_="ColumnAttribute", inline=True),
-                            Html("td", self.rlocale.get_date(birth_date),
+                            Html("td", p_birth,
                                  class_="ColumnValue", inline=True)
                             )
                         table += trow
@@ -1717,7 +1756,7 @@ class PersonPages(BasePage):
                         trow = Html("tr") + (
                             Html("td", self._("Death date"),
                                  class_="ColumnAttribute", inline=True),
-                            Html("td", self.rlocale.get_date(death_date),
+                            Html("td", p_death,
                                  class_="ColumnValue", inline=True)
                             )
                         table += trow
