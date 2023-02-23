@@ -383,6 +383,7 @@ gramps/gui/autocomp.py
 gramps/gui/clipboard.py
 gramps/gui/columnorder.py
 gramps/gui/configure.py
+gramps/gui/csvdialect.py
 gramps/gui/dbloader.py
 gramps/gui/dbman.py
 gramps/gui/dialog.py
@@ -712,6 +713,7 @@ gramps/plugins/textreport/summary.py
 gramps/plugins/textreport/tableofcontents.py
 gramps/plugins/textreport/tagreport.py
 gramps/plugins/textreport/textplugins.gpr.py
+gramps/plugins/thumbnailer/thumb.gpr.py
 gramps/plugins/tool/changenames.glade
 gramps/plugins/tool/changenames.py
 gramps/plugins/tool/changetypes.glade
@@ -808,8 +810,8 @@ gramps/plugins/webstuff/webstuff.py
 #
 #   Files to extract from and then merge into
 #
-data/gramps.xml.in
-data/gramps.appdata.xml.in
-data/gramps.desktop.in
+data/org.gramps_project.Gramps.xml.in
+data/org.gramps_project.Gramps.appdata.xml.in
+data/org.gramps_project.Gramps.desktop.in
 data/holidays.xml
 data/tips.xml
