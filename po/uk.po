@@ -6,22 +6,25 @@
 # qqqlb <qllb.ch@gmail.com>, 2021.
 # Tymofii Lytvynenko <till.svit@gmail.com>, 2021, 2022.
 # Artem <artem@molotov.work>, 2022.
+# Artur Plysyuk <ifuelen@gmail.com>, 2022.
+# Milan <mobrcian@hotmail.com>, 2022.
+# Dan <denqwerta@gmail.com>, 2022.
 msgid ""
 msgstr ""
 "Project-Id-Version: gramps\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-03-14 21:35+0000\n"
-"PO-Revision-Date: 2022-10-10 18:01+0000\n"
-"Last-Translator: Tymofii Lytvynenko <till.svit@gmail.com>\n"
+"PO-Revision-Date: 2022-12-25 21:47+0000\n"
+"Last-Translator: Dan <denqwerta@gmail.com>\n"
 "Language-Team: Ukrainian <https://hosted.weblate.org/projects/gramps-project/"
 "gramps/uk/>\n"
 "Language: uk\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
-"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
-"X-Generator: Weblate 4.14.1\n"
+"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
+"X-Generator: Weblate 4.15.1-dev\n"
 "X-Poedit-Basepath: .\n"
 "X-Poedit-SearchPath-0: .\n"
 
@@ -6722,7 +6725,7 @@ msgstr "Місто"
 #: ../gramps/plugins/webreport/basepage.py:2904
 #: ../gramps/plugins/webreport/basepage.py:2970
 msgid "County"
-msgstr "Країна"
+msgstr "Округ/Графство"
 
 #: ../gramps/gen/lib/address.py:121 ../gramps/gen/lib/location.py:99
 #: ../gramps/gen/lib/placetype.py:66
@@ -9344,7 +9347,7 @@ msgstr "Не можу створити %s"
 #: ../gramps/plugins/importer/importprogen.glade:380
 #: ../gramps/plugins/webreport/webcal.py:492
 msgid "Default"
-msgstr "Стандартно"
+msgstr "За замовчуванням"
 
 #: ../gramps/gen/plug/docgen/graphdoc.py:69
 msgid "PostScript / Helvetica"
