@@ -8,7 +8,7 @@
 # Łukasz Rymarczyk <yenidai(at)poczta(dot)onet(dot)pl>, 2008,2009.
 # Krystian Safjan <ksafjan@gmail.com>, 2020.
 # Nick Hall <nick-h@gramps-project.org>, 2021.
-# WaldiS <sto@tutanota.de>, 2021, 2022.
+# WaldiS <sto@tutanota.de>, 2021, 2022, 2023.
 # Michał Stojek <stojex@gmail.com>, 2022.
 # Kamil K <kamil030201@gmail.com>, 2022.
 msgid ""
@@ -16,8 +16,8 @@ msgstr ""
 "Project-Id-Version: GRAMPS 4.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-03-14 21:35+0000\n"
-"PO-Revision-Date: 2022-09-03 10:16+0000\n"
-"Last-Translator: Kamil K <kamil030201@gmail.com>\n"
+"PO-Revision-Date: 2023-04-06 20:12+0000\n"
+"Last-Translator: WaldiS <sto@tutanota.de>\n"
 "Language-Team: Polish <https://hosted.weblate.org/projects/gramps-project/"
 "gramps/pl/>\n"
 "Language: pl\n"
@@ -26,7 +26,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 "
 "|| n%100>=20) ? 1 : 2;\n"
-"X-Generator: Weblate 4.14.1-dev\n"
+"X-Generator: Weblate 4.17-dev\n"
 "X-Poedit-Basepath: .\n"
 "X-Poedit-SearchPath-0: ~/.poedit/a\n"
 
@@ -393,20 +393,15 @@ msgstr ""
 "pomocą Widok &gt; Filtr."
 
 #: ../data/tips.xml:16
-#, fuzzy
-#| msgid ""
-#| "<b>Inverted Filtering</b><br/>Filters can easily be reversed by using the "
-#| "'invert' option. For instance, by inverting the 'People with children' "
-#| "filter you can select all people without children."
 msgid ""
 "<b>Inverted Filtering</b><br/>Filters can easily be reversed by using the "
 "'invert' option \"Return values that do not match the filter rules\". For "
 "instance, by inverting the 'People with children' filter you can select all "
 "people without children."
 msgstr ""
-"<b>Odwracanie filtrowania</b><br/> Filtry mogą być łatwo zanegowane "
-"(odwrócone) za pomocą opcji 'odwróć'. Na przykład, aby znaleźć 'osoby z "
-"dziećmi' wystarczy wybrać filtr osoby bez dzieci i zastosować tę opcję."
+"<b>Odwrócone filtrowanie</b><br/>Filtry można łatwo odwrócić za pomocą opcji "
+"„odwróć” „Zwracaj wartości, które nie pasują do reguł filtra”. Na przykład, "
+"odwracając filtr „Osoby z dziećmi”, możesz wybrać wszystkie osoby bez dzieci."
 
 #: ../data/tips.xml:18
 msgid ""
@@ -446,7 +441,6 @@ msgstr ""
 "jego małżonków, dzieci, rodzeństwa czy rodziców."
 
 #: ../data/tips.xml:24
-#, fuzzy
 msgid ""
 "<b>Who Was Born When?</b><br/>Under \"Tools &gt; Analysis and exploration "
 "&gt; Compare Individual Events...\" you can compare the data of individuals "
@@ -602,18 +596,16 @@ msgstr ""
 "jednej osoby. Działa także na widokach miejsc, źródeł i magazynów."
 
 #: ../data/tips.xml:46
-#, fuzzy
 msgid ""
 "<b>Organising the Views</b><br/>Many of the views can present your data as "
 "either a hierarchical tree or as a simple list. Each view can also be "
 "configured to the way you like it. Have a look to the right of the top "
 "toolbar or under the \"View\" menu."
 msgstr ""
-"<b>Organizacja widoków</b><br/>Wiele z widoków może wyświetlać Twoje dane "
-"zarówno w postaci hierarchicznej jak i jako płaską listę. Każdy widok może "
-"być dodatkowo skonfigurowany w sposób który Ci będzie odpowiadał, wystarczy "
-"że spojrzysz na prawą część paska narzędzi u góry albo do menu &quot;"
-"Widok&quot;."
+"<b> Organizowanie widoków</b><br/>Wiele widoków może przedstawiać dane jako "
+"drzewo hierarchiczne lub jako prostą listę. Każdy widok można również "
+"skonfigurować tak, jak lubisz. Spójrz na prawo od górnego paska narzędzi lub "
+"w menu \"Widok\"."
 
 #: ../data/tips.xml:48
 msgid ""
@@ -788,18 +780,17 @@ msgstr ""
 "Wyświetlanie\"."
 
 #: ../data/tips.xml:72
-#, fuzzy
 msgid ""
 "<b>Listing Events</b><br/>Events are added using the editor opened with "
 "\"Person &gt; Edit Person &gt; Events\". There is a long list of preset "
 "event types. You can add your own event types by typing in the text field, "
 "they will be added to the available events, but not translated."
 msgstr ""
-"<b>Listowanie zdarzeń</b><br/>Zdarzenia są dodawane za pomocą edytora "
-"otwieranego przez &quot;Osoba &gt; Modyfikuj osobę &gt; Zdarzenia&quot;. "
-"Jest tam długa lista istniejących typów zdarzeń. Możesz dodawać własne "
-"wpisując je w polu tekstowym, będą one dodane do listy dostępnych zdarzeń, "
-"jednak nie będą tłumaczone."
+"<b>Zestawienie zdarzeń</b><br/>Zdarzenia dodaje się za pomocą edytora "
+"otwieranego przyciskiem \"Osoba &gt; Edycja osoby &gt; Zdarzenia\". Istnieje "
+"długa lista wstępnie ustawionych typów zdarzeń. Możesz dodać własne typy "
+"zdarzeń, wpisując je w polu tekstowym, zostaną one dodane do dostępnych "
+"zdarzeń, ale nie będą tłumaczone."
 
 #: ../data/tips.xml:74
 #, fuzzy
@@ -6326,9 +6317,8 @@ msgid "Repositories with the attribute <attribute>"
 msgstr "Repozytoria z atrybutem <attribute>"
 
 #: ../gramps/gen/filters/rules/repository/_hasattribute.py:48
-#, fuzzy
 msgid "Matches repositories with the attribute of a particular value"
-msgstr "Dopasowuje obiekty medialne z podanym atrybutem o określonej wartości"
+msgstr "Dopasowuje repozytoria z atrybutem o określonej wartości"
 
 #: ../gramps/gen/filters/rules/repository/_hasidof.py:44
 msgid "Repository with <Id>"
@@ -6455,9 +6445,8 @@ msgstr ""
 "hh:mm:ss) albo w danym zakresie (jeśli druga data/czas jest podana)."
 
 #: ../gramps/gen/filters/rules/source/_hasattribute.py:46
-#, fuzzy
 msgid "Source attribute:"
-msgstr "Atrybuty źródła"
+msgstr "Atrybut źródła:"
 
 #: ../gramps/gen/filters/rules/source/_hasattribute.py:47
 #, fuzzy
@@ -6465,9 +6454,8 @@ msgid "Sources with the attribute <attribute>"
 msgstr "Zdarzenia z atrybutem <atrybut>"
 
 #: ../gramps/gen/filters/rules/source/_hasattribute.py:48
-#, fuzzy
 msgid "Matches sources with the attribute of a particular value"
-msgstr "Dopasowuje obiekty medialne z podanym atrybutem o określonej wartości"
+msgstr "Dopasowuje źródła z atrybutem o określonej wartości"
 
 #: ../gramps/gen/filters/rules/source/_hasgallery.py:45
 msgid "Sources with <count> media"
@@ -7038,11 +7026,9 @@ msgid "None"
 msgstr "Brak"
 
 #: ../gramps/gen/lib/childreftype.py:68
-#, fuzzy
-#| msgid "Birth"
 msgctxt "relationship"
 msgid "Birth"
-msgstr "Narodziny"
+msgstr "Urodziny"
 
 #: ../gramps/gen/lib/childreftype.py:69
 #, fuzzy
@@ -9828,10 +9814,8 @@ msgid "Short"
 msgstr "Krótki"
 
 #: ../gramps/gen/plug/docgen/treedoc.py:67
-#, fuzzy
-#| msgid "Given Name Cloud Gramplet"
 msgid "Given Nickname Surname"
-msgstr "Gramplet Chmura imion"
+msgstr "Pseudonim Nazwisko"
 
 #: ../gramps/gen/plug/docgen/treedoc.py:68
 #, fuzzy
@@ -18840,6 +18824,9 @@ msgid ""
 "\n"
 "Format:\t%s"
 msgstr ""
+"Dane zostaną wyeksportowane w następujący sposób:\n"
+"\n"
+"Format:\t%s"
 
 #: ../gramps/gui/plug/export/_exportassistant.py:455
 #: ../gramps/gui/plug/export/_exportassistant.py:470
@@ -35019,14 +35006,14 @@ msgid "Clean input data"
 msgstr "Wyczyść dane wejściowe"
 
 #: ../gramps/plugins/tool/removespaces.py:108
-#, fuzzy
 msgid ""
 "Search leading and/or trailing spaces for persons and places. Search comma "
 "or bad sign in coordinates fields.\n"
 "Double click on a row to edit its content."
 msgstr ""
-"Przeszukuje całą bazę danych, szukając cytatów, które mają ten sam wolumin/"
-"stronę, datę i poufność."
+"Przeszukuj początkowe i/lub końcowe spacje dla osób i miejsc. Wyszukaj "
+"przecinek lub zły znak w polach współrzędnych.\n"
+"Kliknij dwukrotnie wiersz, aby edytować jego zawartość."
 
 #: ../gramps/plugins/tool/removespaces.py:118
 msgid "Looking for possible fields with leading or trailing spaces"
@@ -35058,9 +35045,8 @@ msgstr "etykietka narzędzia"
 #: ../gramps/plugins/tool/removespaces.py:275
 #: ../gramps/plugins/tool/removespaces.py:285
 #: ../gramps/plugins/tool/removespaces.py:297
-#, fuzzy
 msgid "leading and/or trailing spaces"
-msgstr "Usuń_poprzedzające_i_kończące_spacje"
+msgstr "początkowe i/lub końcowe spacje"
 
 #: ../gramps/plugins/tool/removespaces.py:282
 #: ../gramps/plugins/tool/removespaces.py:294
@@ -35175,15 +35161,16 @@ msgid ""
 "Enable ID reordering\n"
 "with Start / Step sequence."
 msgstr ""
+"Włącz zmianę kolejności ID\n"
+"z sekwencją Start / Krok."
 
 #: ../gramps/plugins/tool/reorderids.glade:1483
 msgid "Start"
 msgstr "Start"
 
 #: ../gramps/plugins/tool/reorderids.glade:1488
-#, fuzzy
 msgid "Reorder ID start number."
-msgstr "Numer orientacji papieru."
+msgstr "Zmień początkowy numer ID."
 
 #: ../gramps/plugins/tool/reorderids.glade:1501
 msgid "Step"
@@ -35273,8 +35260,9 @@ msgid "Sort family events of the person"
 msgstr "Sortuj zdarzenia rodzinne osoby"
 
 #: ../gramps/plugins/tool/testcasegenerator.py:91
+#, fuzzy
 msgid "Generate_Testcases_for_Persons_and_Families"
-msgstr ""
+msgstr "Generowanie_Testów_dla_Osób_i_Rodzin"
 
 #: ../gramps/plugins/tool/testcasegenerator.py:274
 #: ../gramps/plugins/tool/testcasegenerator.py:280
@@ -35296,12 +35284,12 @@ msgstr "Błąd danych Pro-Gen"
 #: ../gramps/plugins/tool/testcasegenerator.py:294
 #, fuzzy
 msgid "Generate dummy data"
-msgstr "Wygenerowane przez"
+msgstr "Generuj fikcyjne dane"
 
 #: ../gramps/plugins/tool/testcasegenerator.py:299
 #, fuzzy
 msgid "Generate long names"
-msgstr "Generacje"
+msgstr "Generuj długie nazwy"
 
 #: ../gramps/plugins/tool/testcasegenerator.py:304
 msgid "Add special characters"
@@ -35341,7 +35329,7 @@ msgstr "Generowanie błędów bazy danych"
 #: ../gramps/plugins/tool/testcasegenerator.py:394
 #, fuzzy
 msgid "Generating families"
-msgstr "Generuj linie rodzin"
+msgstr "Generowanie rodzin"
 
 #: ../gramps/plugins/tool/testcasegenerator.py:470
 #: ../gramps/plugins/tool/testcasegenerator.py:506
@@ -35508,10 +35496,8 @@ msgstr ""
 
 #: ../gramps/plugins/tool/tools.gpr.py:398
 #: ../gramps/plugins/tool/tools.gpr.py:399
-#, fuzzy
-#| msgid "Sorts events"
 msgid "Sort events"
-msgstr "Sortuje zdarzenia"
+msgstr "Sortuj wydarzenia"
 
 #: ../gramps/plugins/tool/tools.gpr.py:420
 msgid "Verify the Data"
@@ -35551,8 +35537,9 @@ msgid "Dump Gender Statistics"
 msgstr "Przebuduj statystyki płci"
 
 #: ../gramps/plugins/tool/toolsdebug.gpr.py:65
+#, fuzzy
 msgid "Will dump the statistics for guessing the gender from the first name."
-msgstr ""
+msgstr "Pozwala na odgadnięcie płci na podstawie imienia."
 
 #: ../gramps/plugins/tool/verify.glade:215
 msgid "Maximum _age"
@@ -35628,7 +35615,7 @@ msgstr "_Ukryj oznaczone"
 #, fuzzy
 msgctxt "manual"
 msgid "Verify_the_Data"
-msgstr "Weryfikacja poprawności danych..."
+msgstr "Weryfikacja_Danych"
 
 #: ../gramps/plugins/tool/verify.py:295
 msgid "Data Verify tool"
@@ -35791,7 +35778,7 @@ msgstr "Stary wiek ale nie zmarły"
 #: ../gramps/plugins/tool/verify.py:1806
 #, fuzzy
 msgid "Birth equals death"
-msgstr "Data urodzenia"
+msgstr "Narodziny równają się śmierci"
 
 #: ../gramps/plugins/tool/verify.py:1824
 #, fuzzy
@@ -36124,7 +36111,7 @@ msgstr "Tło"
 
 #: ../gramps/plugins/view/fanchart2wayview.py:313
 msgid "Add global background colored gradient"
-msgstr ""
+msgstr "Dodaj globalny gradient w kolorze tła"
 
 #: ../gramps/plugins/view/fanchart2wayview.py:317
 #: ../gramps/plugins/view/fanchartdescview.py:309
@@ -36336,6 +36323,9 @@ msgid ""
 "with coordinates. You can use the history to navigate on the map. You can "
 "use filtering."
 msgstr ""
+"Kliknij prawym przyciskiem myszy na mapie i wybierz „pokaż wszystkie "
+"wydarzenia”, aby wyświetlić wszystkie znane wydarzenia ze współrzędnymi. "
+"Możesz użyć historii do nawigacji po mapie. Możesz użyć filtrowania."
 
 #: ../gramps/plugins/view/geoevents.py:410
 #: ../gramps/plugins/view/geoevents.py:441
@@ -36513,16 +36503,15 @@ msgid "Every residence or move for a person and any descendants"
 msgstr "Wszystkie przemieszczenia dla jednej osoby i jej potomków"
 
 #: ../gramps/plugins/view/geography.gpr.py:123
-#, fuzzy
 msgid ""
 "A view showing all the places visited by all persons during their life.\n"
 "This is for a person and any descendant.\n"
 "You can see the dates corresponding to the period."
 msgstr ""
-"Widok pokazujący wszystkie miejsca odwiedzone przez wszystkie osoby podczas "
-"ich życia.\n"
-"To jest dla jednej osoby i jej potomków.\n"
-"Możesz zobaczyć daty odpowiadające temu okresowi."
+"Widok przedstawiający wszystkie miejsca odwiedzone przez wszystkie osoby w "
+"ciągu ich życia.\n"
+"Dotyczy to osoby i każdego potomka.\n"
+"Możesz zobaczyć daty odpowiadające okresowi."
 
 #: ../gramps/plugins/view/geography.gpr.py:143
 msgid ""
@@ -36567,8 +36556,7 @@ msgid "GeoMoves"
 msgstr "GeoMoves"
 
 #: ../gramps/plugins/view/geomoves.py:573
-#, fuzzy, python-format
-#| msgid "All descendance for %s"
+#, python-format
 msgid "All descendants for %s"
 msgstr "Wszyscy potomkowie dla %s"
 
@@ -36823,7 +36811,7 @@ msgstr "Lewo <-> Prawo"
 #: ../gramps/plugins/view/pedigreeview.py:1715
 #, fuzzy
 msgid "About Pedigree View"
-msgstr "Widok rodowodu"
+msgstr "Informacje o widoku rodowodu"
 
 #: ../gramps/plugins/view/pedigreeview.py:1926
 #: ../gramps/plugins/view/relview.py:391
@@ -37187,9 +37175,8 @@ msgid "Showing descendants through a fanchart"
 msgstr "Wyświetl potomków przez wykres wachlarzowy"
 
 #: ../gramps/plugins/view/view.gpr.py:175
-#, fuzzy
 msgid "Showing ascendants and descendants through a fanchart"
-msgstr "Wyświetl potomków przez wykres wachlarzowy"
+msgstr "Pokaż przodków i potomków na wykresie wachlarzowym"
 
 #: ../gramps/plugins/view/view.gpr.py:188
 msgid "Grouped People"
@@ -37759,13 +37746,12 @@ msgid "Whether to use http:// or https://"
 msgstr "Określenie, czy używać http:// czy https://"
 
 #: ../gramps/plugins/webreport/narrativeweb.py:2075
-#, fuzzy
 msgid "Toggle sections"
 msgstr "Wybór selekcji"
 
 #: ../gramps/plugins/webreport/narrativeweb.py:2076
 msgid "Check it if you want to open/close a section"
-msgstr ""
+msgstr "Zaznacz, jeśli chcesz otworzyć/zamknąć sekcję"
 
 #: ../gramps/plugins/webreport/narrativeweb.py:2086
 msgid "Extra pages"
@@ -37789,7 +37775,7 @@ msgstr ""
 
 #: ../gramps/plugins/webreport/narrativeweb.py:2117
 msgid "Do we use multiple translations?"
-msgstr ""
+msgstr "Czy używamy wielu tłumaczeń?"
 
 #: ../gramps/plugins/webreport/narrativeweb.py:2119
 msgid ""
@@ -37797,6 +37783,9 @@ msgid ""
 "See the translation tab to add new languages to the default one defined in "
 "the next field."
 msgstr ""
+"Jeśli chcesz, aby strona narracyjna była wyświetlana w wielu językach.\n"
+"Zobacz zakładkę tłumaczenia, aby dodać nowe języki do domyślnego "
+"zdefiniowanego w następnym polu."
 
 #: ../gramps/plugins/webreport/narrativeweb.py:2133
 msgid "Sort all children in birth order"
