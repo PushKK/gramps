@@ -63,7 +63,7 @@ from gramps.gen.display.name import displayer as _nd
 from gramps.gen.display.place import displayer as _pd
 from gramps.gen.utils.db import get_birth_or_fallback, get_death_or_fallback
 from gramps.plugins.lib.libhtml import Html
-from gramps.gen.utils.place import conv_lat_lon
+from gramps.gen.utils.place import conv_lat_lon, coord_formats
 from gramps.gen.proxy import LivingProxyDb
 from gramps.gen.relationship import get_relationship_calculator
 
@@ -481,6 +481,7 @@ class PersonPages(BasePage):
         self.gender_map = {
             Person.MALE    : self._('male'),
             Person.FEMALE  : self._('female'),
+            Person.OTHER   : self._('other'),
             Person.UNKNOWN : self._('unknown'),
             }
 
@@ -794,7 +795,8 @@ class PersonPages(BasePage):
             miny, maxy = Decimal(miny), Decimal(maxy)
             midy_ = str(Decimal((miny + maxy) /2))
 
-            midx_, midy_ = conv_lat_lon(midx_, midy_, "D.D8")
+            midx_, midy_ = conv_lat_lon(midx_, midy_,
+                                        coord_formats[self.report.options['coord_format']])
 
             # get the integer span of latitude and longitude
             dummy_spanx = int(maxx - minx)
@@ -1150,6 +1152,8 @@ class PersonPages(BasePage):
             divclass = "male"
         elif sex == Person.FEMALE:
             divclass = "female"
+        elif sex == Person.OTHER:
+            divclass = "other"
         else:
             divclass = "unknown"
 
@@ -1703,14 +1707,14 @@ class PersonPages(BasePage):
                     birth = self.r_db.get_event_from_handle(birth_ref.ref)
                     if birth:
                         birth_date = birth.get_date_object()
-                        p_birth = _pd.display_event(self.r_db, birth)
+                        p_birth = _pd.display_event(self.r_db, birth, fmt=0)
 
                 death_ref = self.person.get_death_ref()
                 p_death = ""
                 if death_ref:
                     death = self.r_db.get_event_from_handle(death_ref.ref)
                     if death:
-                        p_death = _pd.display_event(self.r_db, death)
+                        p_death = _pd.display_event(self.r_db, death, fmt=0)
 
                 death_date = _find_death_date(self.r_db, self.person)
                 if birth_date and birth_date is not Date.EMPTY:
