@@ -124,6 +124,9 @@ class FamilyView(ListView):
 
         self.additional_uis.append(self.additional_ui)
 
+    def get_config_name(self):
+        return __name__
+
     def navigation_type(self):
         return 'Family'
 
@@ -347,6 +350,16 @@ class FamilyView(ListView):
                 _("Could Not Set a Bookmark"),
                 _("A bookmark could not be set because "
                   "no one was selected."), parent=self.uistate.window)
+
+    def get_handle_from_gramps_id(self, gid):
+        """
+        Return the handle of the family having the given Gramps ID.
+        """
+        obj = self.dbstate.db.get_family_from_gramps_id(gid)
+        if obj:
+            return obj.get_handle()
+        else:
+            return None
 
     def add(self, *obj):
         family = Family()

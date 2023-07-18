@@ -494,6 +494,13 @@ def color_graph_box(alive=False, gender=Person.MALE):
         else:
             return (config.get('colors.female-dead')[scheme],
                     config.get('colors.border-female-dead')[scheme])
+    elif gender == Person.OTHER:
+        if alive:
+            return (config.get('colors.other-alive')[scheme],
+                    config.get('colors.border-other-alive')[scheme])
+        else:
+            return (config.get('colors.other-dead')[scheme],
+                    config.get('colors.border-other-dead')[scheme])
     elif gender == Person.UNKNOWN:
         if alive:
             return (config.get('colors.unknown-alive')[scheme],
@@ -517,11 +524,26 @@ def color_graph_box(alive=False, gender=Person.MALE):
 
 # color functions. For hsv and hls values, use import colorsys !
 
+def name_to_hex(value):
+    """
+    Convert a named color to a 6 digit hexadecimal value to rgb.
+    """
+    if value[:1] != "#":
+        # We have color names like "green", "orange", "yellow",...
+        # We need to convert them to hex format
+        Color = Gdk.RGBA()
+        Color.parse(value)
+        value = "#%02x%02x%02x" % (int(Color.red * 255),
+                                   int(Color.green * 255),
+                                   int(Color.blue * 255))
+    return value
+
 def hex_to_rgb_float(value):
     """
     Convert a 6 or 12 digit hexademical value to rgb. Returns tuple of floats
     between 0 and 1.
     """
+    value = name_to_hex(value)
     value = value.lstrip('#')
     lenv = len(value)
     return tuple(int(value[i:i+lenv//3], 16)/16.0**(lenv//3)
@@ -531,6 +553,7 @@ def hex_to_rgb(value):
     """
     Convert a 6 or 12 digit hexadecimal value to rgb. Returns tuple of integers.
     """
+    value = name_to_hex(value)
     value = value.lstrip('#')
     lenv = len(value)
     return tuple(int(value[i:i+lenv//3], 16) for i in range(0, lenv, lenv//3))
@@ -551,8 +574,8 @@ def get_contrast_color(color):
     """
     yiq = (color[0]*299)+(color[1]*587)+(color[2]*114)
     if (yiq < 500):
-        return (1, 1, 1)  # 'white'
-    return (0, 0, 0)      # 'black'
+        return (1.0, 1.0, 1.0)  # 'white'
+    return (0.0, 0.0, 0.0)      # 'black'
 
 def get_link_color(context):
     """
@@ -560,13 +583,7 @@ def get_link_color(context):
     """
     from gi.repository import Gtk
 
-    if Gtk.get_minor_version() > 11:
-        col = context.get_color(Gtk.StateFlags.LINK)
-    else:
-        found, col = context.lookup_color('link_color')
-        if not found:
-            col.parse('blue')
-
+    col = context.get_color(Gtk.StateFlags.LINK)
     return rgb_to_hex((col.red, col.green, col.blue))
 
 

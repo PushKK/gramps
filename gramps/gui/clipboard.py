@@ -59,6 +59,8 @@ from .ddtargets import DdTargets
 from .makefilter import make_filter
 from .utils import is_right_click, no_match_primary_mask
 from gramps.gen.const import GRAMPS_LOCALE as glocale
+from gramps.gen.config import config
+from gramps.gui.widgets.persistenttreeview import PersistentTreeView
 _ = glocale.translation.sgettext
 
 #-------------------------------------------------------------------------
@@ -1373,6 +1375,8 @@ class ClipboardWindow(ManagedWindow):
         self.top = Glade()
         self.set_window(self.top.toplevel, None, None, msg=_("Clipboard"))
         self.setup_configs('interface.clipboard', 500, 300)
+        if not config.get('behavior.immediate-warn'):
+            self.get_window().set_tooltip_text(_("Any changes are saved immediately"))
 
         self.clear_all_btn = self.top.get_object("btn_clear_all")
         self.clear_btn = self.top.get_object("btn_clear")
@@ -1412,6 +1416,7 @@ class ClipboardWindow(ManagedWindow):
         self.db.connect('database-changed',
                         lambda x: ClipboardWindow.otree.clear())
 
+        mtv.restore_column_size()
         self.show()
 
     def build_menu_names(self, obj):
@@ -1453,7 +1458,7 @@ class ClipboardWindow(ManagedWindow):
 # MultiTreeView class
 #
 #-------------------------------------------------------------------------
-class MultiTreeView(Gtk.TreeView):
+class MultiTreeView(PersistentTreeView):
     '''
     TreeView that captures mouse events to make drag and drop work properly
     '''
@@ -1461,7 +1466,7 @@ class MultiTreeView(Gtk.TreeView):
         self.dbstate = dbstate
         self.uistate = uistate
         self.title = title if title else _("Clipboard")
-        Gtk.TreeView.__init__(self)
+        PersistentTreeView.__init__(self, self.uistate, "clipboard")
         self.connect('button_press_event', self.on_button_press)
         self.connect('button_release_event', self.on_button_release)
         self.connect('drag-end', self.on_drag_end)
