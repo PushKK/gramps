@@ -50,7 +50,7 @@ if "-S" in sys.argv or "--safe" in sys.argv:
 # Gramps modules
 #
 #-------------------------------------------------------------------------
-from .gen.const import APP_GRAMPS, USER_DIRLIST, HOME_DIR, ORIG_HOME_DIR
+from .gen.const import APP_GRAMPS, USER_DIRLIST, USER_DATA, ORIG_HOME_DIR
 from .gen.constfunc import mac
 from .version import VERSION_TUPLE
 from .gen.constfunc import win, get_env_var
@@ -113,7 +113,7 @@ form = logging.Formatter(fmt="%(asctime)s.%(msecs).03d: %(levelname)s: "
 if win():
     # If running in GUI mode redirect stdout and stderr to log file
     if not sys.stdout:
-        logfile = os.path.join(HOME_DIR,
+        logfile = os.path.join(USER_DATA,
             "Gramps%s%s.log") % (VERSION_TUPLE[0],
             VERSION_TUPLE[1])
         # We now carry out the first step in build_user_paths(), to make sure
@@ -122,10 +122,10 @@ if win():
         # block, and any failure will be logged. However, if the creation of the
         # user directory fails here, there is no way to report the failure,
         # because stdout/stderr are not available, and neither is the logfile.
-        if os.path.islink(HOME_DIR):
+        if os.path.islink(USER_DATA):
             pass  # ok
-        elif not os.path.isdir(HOME_DIR):
-            os.makedirs(HOME_DIR)
+        elif not os.path.isdir(USER_DATA):
+            os.makedirs(USER_DATA)
         sys.stdout = sys.stderr = open(logfile, "w", encoding='utf-8')
 # macOS sets stderr to /dev/null when running without a terminal,
 # e.g. if Gramps.app is lauched by double-clicking on it in
@@ -184,7 +184,7 @@ from .gen.mime import mime_type_is_defined
 #
 #-------------------------------------------------------------------------
 
-MIN_PYTHON_VERSION = (3, 5, 0, '', 0)
+MIN_PYTHON_VERSION = (3, 8, 0, '', 0)
 if not sys.version_info >= MIN_PYTHON_VERSION:
     logging.warning(_("Your Python version does not meet the "
              "requirements. At least Python %(v1)d.%(v2)d.%(v3)d is needed to"
@@ -270,6 +270,13 @@ def show_settings():
         cairover_str = 'not found'
 
     try:
+        gi.require_version('PangoCairo', '1.0')
+        from gi.repository import PangoCairo
+        pangocairo_str = PangoCairo._version
+    except ImportError:
+        pangocairo_str = _("not found")
+
+    try:
         from gi import Repository
         repository = Repository.get_default()
         if repository.enumerate_versions("OsmGpsMap"):
@@ -287,10 +294,9 @@ def show_settings():
         osmgpsmap_str = 'not found'
 
     try:
-        from gi import Repository
-        repository = Repository.get_default()
+        import gi
+        repository = gi.Repository.get_default()
         if repository.enumerate_versions("GExiv2"):
-            import gi
             gi.require_version('GExiv2', '0.10')
             from gi.repository import GExiv2
             try:
@@ -306,6 +312,20 @@ def show_settings():
         gexiv2_str = 'not new enough'
 
     try:
+        vers_str = Popen(['exiv2', '-V'],
+                         stdout=PIPE).communicate(input=None)[0]
+        try:
+            if isinstance(vers_str, bytes) and sys.stdin.encoding:
+                vers_str = vers_str.decode(sys.stdin.encoding)
+            indx = vers_str.find('exiv2 ') + 6
+            vers_str = vers_str[indx: indx + 4]
+        except Exception:
+            vers_str = _('not found')
+
+    except Exception:
+        vers_str = _("not found because exiv2 is not installed")
+
+    try:
         import PyICU
         try:
             pyicu_str = PyICU.VERSION
@@ -319,15 +339,82 @@ def show_settings():
         icu_str = 'not found'
 
     try:
+        import icu
+        icu_str = icu.PY_VERSION
+    except Exception:
+        icu_str = _('not found')
+
+    try:
+        import PIL
+        try:
+            pil_ver = PIL.__version__
+        except Exception:
+            try:
+                pil_ver = str(PIL.PILLOW_VERSION)
+            except Exception:
+                try:
+                    # print(dir(PIL))
+                    pil_ver = str(PIL.VERSION)
+                except Exception:
+                    pil_ver = _("Installed but does not supply version")
+    except ImportError:
+        pil_ver = _("not found")
+
+    def verstr(nums):
+        return '.'.join(str(num) for num in nums)
+
+    try:
+        gi.require_version('Gspell', '1')
+        from gi.repository import Gspell
+        gspell_ver = str(Gspell._version)
+    except Exception:
+        gspell_ver = _("not found")
+
+    #RCS_MIN_VER = (5, 9, 4)
+    #rcs_ver_str = verstr(RCS_MIN_VER)
+    # print("os.environ: %s " % os.environ)
+    try:
+        if win():
+            _RCS_FOUND = os.system("rcs -V >nul 2>nul") == 0
+            rcs_ver = _("installed")
+            # print("rcs -V : " + os.system("rcs -V"))
+            if _RCS_FOUND and "TZ" not in os.environ:
+                # RCS requires the "TZ" variable be set.
+                os.environ["TZ"] = str(time.timezone)
+        else:
+            import subprocess
+            import re
+            # print("xx rcs -V : " + os.system("rcs --version"))
+            _RCS_FOUND = str(subprocess.check_output(['rcs', '--version']))
+            version = re.compile(".*GNU RCS\) ([0-9]+\.[0-9]+\.[0-9]+).*")
+            rcs_ver = version.findall(_RCS_FOUND)[0]
+    except Exception:
+                rcs_ver = _("not found")
+
+    try:
+        gi.require_version('GeocodeGlib', '1.0')
+        from gi.repository import GeocodeGlib
+        geocodeglib_ver = str(GeocodeGlib._version)
+    except Exception:
+        geocodeglib_ver = _("not found")
+
+    try:
         import bsddb3 as bsddb
         bsddb_str = bsddb.__version__
         bsddb_db_str = str(bsddb.db.version()).replace(', ', '.')\
                                         .replace('(', '').replace(')', '')
         bsddb_location_str = bsddb.__file__
     except:
-        bsddb_str = 'not found'
-        bsddb_db_str = 'not found'
-        bsddb_location_str = 'not found'
+        try:
+            import berkeleydb as bsddb
+            bsddb_str = bsddb.__version__
+            bsddb_db_str = str(bsddb.db.version()).replace(', ', '.')\
+                                                  .replace('(', '').replace(')', '')
+            bsddb_location_str = bsddb.__file__
+        except:
+            bsddb_str = 'not found'
+            bsddb_db_str = 'not found'
+            bsddb_location_str = 'not found'
 
     try:
         import sqlite3
@@ -386,20 +473,37 @@ def show_settings():
 
     print("Gramps Settings:")
     print("----------------")
-    print(' python    : %s' % py_str)
     print(' gramps    : %s' % gramps_str)
-    print(' gtk++     : %s' % gtkver_str)
-    print(' pygobject : %s' % pygobjectver_str)
-    print(' pango     : %s' % pangover_str)
-    print(' cairo     : %s' % cairover_str)
-    print(' pycairo   : %s' % pycairover_str)
-    print(' osmgpsmap : %s' % osmgpsmap_str)
-    print(' GExiv2    : %s' % gexiv2_str)
-    print(' ICU       : %s' % icu_str)
-    print(' PyICU     : %s' % pyicu_str)
     print(' o.s.      : %s' % sys.platform)
     if kernel:
         print(' kernel    : %s' % kernel)
+    print('')
+    print("Required:")
+    print("---------")
+    print(' Python    : %s' % py_str)
+    print(' Gtk++     : %s' % gtkver_str)
+    print(' pygobject : %s' % pygobjectver_str)
+    print(' Cairo     : %s' % cairover_str)
+    print(' pycairo   : %s' % pycairover_str)
+    print(' Pango     : %s' % pangover_str)
+    print(' PangoCairo: %s' % pangocairo_str)
+    print('')
+    print("Recommended:")
+    print("------------")
+    print(' osmgpsmap : %s' % osmgpsmap_str)
+    print(' Graphviz  : %s' % dotversion_str)
+    print(' Ghostscr. : %s' % gsversion_str)
+    print(' ICU       : %s' % icu_str)
+    print(' PyICU     : %s' % pyicu_str)
+    print('')
+    print("Optional:")
+    print("---------")
+    print(' Gspell     :', gspell_ver)
+    print(' RCS        :', rcs_ver)
+    print(' PILLOW     :', pil_ver)
+    print(' GExiv2     : %s' % gexiv2_str)
+    print(' Exiv2 lib. : %s' % vers_str)
+    print(' geocodeglib: %s' % geocodeglib_ver)
     print('')
     print("Environment settings:")
     print("---------------------")
@@ -413,11 +517,6 @@ def show_settings():
     print(' PYTHONPATH:')
     for folder in sys.path:
         print("   ", folder)
-    print('')
-    print("Non-Python dependencies:")
-    print("------------------------")
-    print(' Graphviz  : %s' % dotversion_str)
-    print(' Ghostscr. : %s' % gsversion_str)
     print('')
     print("System PATH env variable:")
     print("-------------------------")
@@ -482,8 +581,6 @@ def run():
     LOG.debug("Translating Gramps to %s", glocale.language[0])
     LOG.debug("Collation Locale: %s", glocale.collation)
     LOG.debug("Date/Time Locale: %s", glocale.calendar)
-    LOG.debug("Currency Locale: %s", glocale.currency)
-    LOG.debug("Number-format Locale: %s", glocale.numeric)
 
     if 'LANG' in os.environ:
         LOG.debug('Using LANG: %s' %
@@ -521,6 +618,9 @@ def main():
     if errors and isinstance(errors, list):
         for error in errors:
             logging.warning(error[0] + error[1])
+
+    sys.stdout.close()
+    sys.stderr.close()
 
 if __name__ == '__main__':
     main()
