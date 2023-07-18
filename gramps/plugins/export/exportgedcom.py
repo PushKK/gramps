@@ -160,10 +160,9 @@ def breakup(txt, limit):
     data = []
     while len(txt) > limit:
         # look for non-space pair to break between
-        # do not break within a UTF-8 byte sequence, i. e. first char >127
+        # fix issue #0012709 by removing Python2 code obsoleted by Python3
         idx = limit
-        while (idx > 0 and (txt[idx - 1].isspace() or txt[idx].isspace() or
-                            ord(txt[idx - 1]) > 127)):
+        while (idx > 0 and (txt[idx - 1].isspace() or txt[idx].isspace())):
             idx -= 1
         if idx == 0:
             #no words to break on, just break at limit anyway
@@ -513,14 +512,16 @@ class GedcomWriter(UpdateCallback):
         Write out the gender of the person to the file.
 
         If the gender is not male or female, simply do not output anything.
-        The only valid values are M (male) or F (female). So if the geneder is
-        unknown, we output nothing.
+        The only valid values are M (male), F (female) and X (other). So if
+        the gender is unknown, we output nothing.
 
         """
         if person.get_gender() == Person.MALE:
             self._writeln(1, "SEX", "M")
         elif person.get_gender() == Person.FEMALE:
             self._writeln(1, "SEX", "F")
+        elif person.get_gender() == Person.OTHER:
+            self._writeln(1, "SEX", "X")
 
     def _lds_ords(self, obj, level):
         """
@@ -1352,6 +1353,8 @@ class GedcomWriter(UpdateCallback):
         """
 
         citation = self.dbase.get_citation_from_handle(citation_handle)
+        if citation is None: # removed by proxy
+            return
 
         src_handle = citation.get_reference_handle()
         if src_handle is None:

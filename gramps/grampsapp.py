@@ -50,7 +50,7 @@ if "-S" in sys.argv or "--safe" in sys.argv:
 # Gramps modules
 #
 #-------------------------------------------------------------------------
-from .gen.const import APP_GRAMPS, USER_DIRLIST, HOME_DIR, ORIG_HOME_DIR
+from .gen.const import APP_GRAMPS, USER_DIRLIST, USER_DATA, ORIG_HOME_DIR
 from .gen.constfunc import mac
 from .version import VERSION_TUPLE
 from .gen.constfunc import win, get_env_var
@@ -113,7 +113,7 @@ form = logging.Formatter(fmt="%(asctime)s.%(msecs).03d: %(levelname)s: "
 if win():
     # If running in GUI mode redirect stdout and stderr to log file
     if not sys.stdout:
-        logfile = os.path.join(HOME_DIR,
+        logfile = os.path.join(USER_DATA,
             "Gramps%s%s.log") % (VERSION_TUPLE[0],
             VERSION_TUPLE[1])
         # We now carry out the first step in build_user_paths(), to make sure
@@ -122,10 +122,10 @@ if win():
         # block, and any failure will be logged. However, if the creation of the
         # user directory fails here, there is no way to report the failure,
         # because stdout/stderr are not available, and neither is the logfile.
-        if os.path.islink(HOME_DIR):
+        if os.path.islink(USER_DATA):
             pass  # ok
-        elif not os.path.isdir(HOME_DIR):
-            os.makedirs(HOME_DIR)
+        elif not os.path.isdir(USER_DATA):
+            os.makedirs(USER_DATA)
         sys.stdout = sys.stderr = open(logfile, "w", encoding='utf-8')
 # macOS sets stderr to /dev/null when running without a terminal,
 # e.g. if Gramps.app is lauched by double-clicking on it in
@@ -184,7 +184,7 @@ from .gen.mime import mime_type_is_defined
 #
 #-------------------------------------------------------------------------
 
-MIN_PYTHON_VERSION = (3, 5, 0, '', 0)
+MIN_PYTHON_VERSION = (3, 8, 0, '', 0)
 if not sys.version_info >= MIN_PYTHON_VERSION:
     logging.warning(_("Your Python version does not meet the "
              "requirements. At least Python %(v1)d.%(v2)d.%(v3)d is needed to"
@@ -323,7 +323,7 @@ def show_settings():
             vers_str = _('not found')
 
     except Exception:
-        vers_str = _("can't found it because exiv2 not installed")
+        vers_str = _("not found because exiv2 is not installed")
 
     try:
         import PyICU
@@ -363,53 +363,12 @@ def show_settings():
     def verstr(nums):
         return '.'.join(str(num) for num in nums)
 
-    #GTKSPELL_MIN_VER = (3, 0)
-    #gtkspell_min_ver_str = verstr(GTKSPELL_MIN_VER)
-    # ENCHANT_MIN_VER = (0, 0)  # TODO ?
-    gtkspell_ver_tp = (0, 0)
-    # Attempting to import gtkspell gives an error dialog if gtkspell is
-    # not available so test first and log just a warning to the console
-    # instead.
     try:
-        from gi import Repository
-        repository = Repository.get_default()
-        gtkspell_ver = _("not found")
-        if repository.enumerate_versions("GtkSpell"):
-            try:
-                gi.require_version('GtkSpell', '3.0')
-                from gi.repository import GtkSpell as Gtkspell
-                gtkspell_ver = str(Gtkspell._version)
-                aaa = Gtkspell._version.split(".")
-                v1 = int(aaa[0])
-                v2 = int(aaa[1])
-                gtkspell_ver_tp = (v1, v2)
-                # print("gtkspell_ver " + gtkspell_ver)
-            except Exception:
-                gtkspell_ver = _("not found")
-        elif repository.enumerate_versions("Gtkspell"):
-            try:
-                gi.require_version('Gtkspell', '3.0')
-                from gi.repository import Gtkspell
-                gtkspell_ver = str(Gtkspell._version)
-                gtkspell_ver_tp = Gtkspell._version
-                # print("gtkspell_ver " + gtkspell_ver)
-            except Exception:
-                gtkspell_ver = _("not found")
+        gi.require_version('Gspell', '1')
+        from gi.repository import Gspell
+        gspell_ver = str(Gspell._version)
     except Exception:
-        gtkspell_ver = _("not found")
-
-    try:
-        import enchant
-        enchant_result = enchant.get_enchant_version()
-    except Exception:
-        from ctypes import cdll, c_char_p
-        try:
-            enchant = cdll.LoadLibrary("libenchant")
-        except FileNotFoundError:
-            enchant = cdll.LoadLibrary("libenchant-2")
-        enchant_ver_call = enchant.enchant_get_version
-        enchant_ver_call.restype = c_char_p
-        enchant_result = enchant_ver_call().decode("utf-8")
+        gspell_ver = _("not found")
 
     #RCS_MIN_VER = (5, 9, 4)
     #rcs_ver_str = verstr(RCS_MIN_VER)
@@ -446,9 +405,16 @@ def show_settings():
                                         .replace('(', '').replace(')', '')
         bsddb_location_str = bsddb.__file__
     except:
-        bsddb_str = 'not found'
-        bsddb_db_str = 'not found'
-        bsddb_location_str = 'not found'
+        try:
+            import berkeleydb as bsddb
+            bsddb_str = bsddb.__version__
+            bsddb_db_str = str(bsddb.db.version()).replace(', ', '.')\
+                                                  .replace('(', '').replace(')', '')
+            bsddb_location_str = bsddb.__file__
+        except:
+            bsddb_str = 'not found'
+            bsddb_db_str = 'not found'
+            bsddb_location_str = 'not found'
 
     try:
         import sqlite3
@@ -532,8 +498,7 @@ def show_settings():
     print('')
     print("Optional:")
     print("---------")
-    print(' Gtkspell   :', gtkspell_ver)
-    print(' Enchant    :', enchant_result)
+    print(' Gspell     :', gspell_ver)
     print(' RCS        :', rcs_ver)
     print(' PILLOW     :', pil_ver)
     print(' GExiv2     : %s' % gexiv2_str)
@@ -616,8 +581,6 @@ def run():
     LOG.debug("Translating Gramps to %s", glocale.language[0])
     LOG.debug("Collation Locale: %s", glocale.collation)
     LOG.debug("Date/Time Locale: %s", glocale.calendar)
-    LOG.debug("Currency Locale: %s", glocale.currency)
-    LOG.debug("Number-format Locale: %s", glocale.numeric)
 
     if 'LANG' in os.environ:
         LOG.debug('Using LANG: %s' %
@@ -655,6 +618,9 @@ def main():
     if errors and isinstance(errors, list):
         for error in errors:
             logging.warning(error[0] + error[1])
+
+    sys.stdout.close()
+    sys.stderr.close()
 
 if __name__ == '__main__':
     main()

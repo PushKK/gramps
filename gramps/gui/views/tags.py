@@ -52,6 +52,7 @@ from ..dialog import ErrorDialog, QuestionDialog2
 import gramps.gui.widgets.progressdialog as progressdlg
 from ..uimanager import ActionGroup
 from ..managedwindow import ManagedWindow
+from gramps.gen.config import config
 
 #-------------------------------------------------------------------------
 #
@@ -276,12 +277,8 @@ class Tags(DbGUIElement):
         popup_menu = Gtk.Menu.new_from_model(menu)
         popup_menu.attach_to_widget(button, None)
         popup_menu.show_all()
-        if Gtk.MINOR_VERSION < 22:
-            # ToDo The following is reported to work poorly with Wayland
-            popup_menu.popup(None, None, cb_menu_position, button, 0, 0)
-        else:
-            popup_menu.popup_at_widget(button, Gdk.Gravity.SOUTH,
-                                       Gdk.Gravity.NORTH_WEST, None)
+        popup_menu.popup_at_widget(button, Gdk.Gravity.SOUTH,
+                                   Gdk.Gravity.NORTH_WEST, None)
 
     def cb_organize_tags(self, *action):
         """
@@ -388,6 +385,8 @@ class OrganizeTagsDialog(ManagedWindow):
         self.top = self._create_dialog()
         self.set_window(self.top, None, _('Organize Tags'))
         self.setup_configs('interface.organizetagsdialog', 400, 350)
+        if not config.get('behavior.immediate-warn'):
+            self.get_window().set_tooltip_text(_("Any changes are saved immediately"))
         self.show()
         self.run()
 
