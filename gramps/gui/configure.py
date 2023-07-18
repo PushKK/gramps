@@ -50,13 +50,14 @@ from gi.repository import Pango
 #-------------------------------------------------------------------------
 from gramps.gen.config import config
 from gramps.gen.const import GRAMPS_LOCALE as glocale
-from gramps.gen.const import HOME_DIR, URL_WIKISTRING, URL_MANUAL_PAGE
+from gramps.gen.const import USER_DATA, URL_WIKISTRING, URL_MANUAL_PAGE
 from gramps.gen.datehandler import get_date_formats
 from gramps.gen.display.name import displayer as _nd
 from gramps.gen.display.name import NameDisplayError
 from gramps.gen.display.place import displayer as _pd
 from gramps.gen.utils.alive import update_constants
 from gramps.gen.utils.file import media_path
+from gramps.gen.utils.place import coord_formats
 from gramps.gen.utils.keyword import (get_keywords, get_translations,
                                       get_translation_from_keyword,
                                       get_keyword_from_translation)
@@ -70,7 +71,7 @@ from .display import display_help
 from gramps.gen.plug.utils import available_updates
 from .plug import PluginWindows
 #from gramps.gen.errors import WindowActiveError
-from .spell import HAVE_GTKSPELL
+from .spell import HAVE_GSPELL
 from gramps.gen.constfunc import win
 _ = glocale.translation.gettext
 from gramps.gen.utils.symbols import Symbols
@@ -192,6 +193,8 @@ class ConfigureDialog(ManagedWindow):
         self.window.vbox.pack_start(self.panel, True, True, 0)
         self.__on_close = on_close
         self.window.connect('response', self.done)
+        if not config.get('behavior.immediate-warn'):
+            self.window.set_tooltip_text(_("Any changes are saved immediately"))
 
         self.__setup_pages(configure_page_funcs)
 
@@ -719,9 +722,10 @@ class GrampsPreferences(ConfigureDialog):
 
         color_type = {'Male': _('Colors for Male persons'),
                       'Female': _('Colors for Female persons'),
+                      'Other': _('Colors for people who are neither male nor female'),
                       'Unknown': _('Colors for Unknown persons'),
                       'Family': _('Colors for Family nodes'),
-                      'Other': _('Other colors')}
+                      'Misc': _('Other colors')}
 
         bg_alive_text = _('Background for Alive')
         bg_dead_text = _('Background for Dead')
@@ -740,6 +744,11 @@ class GrampsPreferences(ConfigureDialog):
             (bg_dead_text, 'female-dead', 2, 1, 'Female'),
             (brd_alive_text, 'border-female-alive', 1, 4, 'Female'),
             (brd_dead_text, 'border-female-dead', 2, 4, 'Female'),
+            # for other
+            (bg_alive_text, 'other-alive', 1, 1, 'Other'),
+            (bg_dead_text, 'other-dead', 2, 1, 'Other'),
+            (brd_alive_text, 'border-other-alive', 1, 4, 'Other'),
+            (brd_dead_text, 'border-other-dead', 2, 4, 'Other'),
             # for unknown
             (bg_alive_text, 'unknown-alive', 1, 1, 'Unknown'),
             (bg_dead_text, 'unknown-dead', 2, 1, 'Unknown'),
@@ -758,7 +767,7 @@ class GrampsPreferences(ConfigureDialog):
             (_('Border for Divorced'),
              'border-family-divorced', 7, 4, 'Family'),
             # for other
-            (_('Background for Home Person'), 'home-person', 1, 1, 'Other'),
+            (_('Background for Home Person'), 'home-person', 1, 1, 'Misc'),
             ]
 
         # prepare scrolled window for colors settings
@@ -828,6 +837,11 @@ class GrampsPreferences(ConfigureDialog):
             grid, _('Suppress warning about missing researcher when'
                     ' exporting to GEDCOM'),
             row, 'behavior.owner-warn', start=1)
+        row += 1
+        self.add_checkbox(
+            grid, _('Suppress tooltip warnings about data being saved'
+                    ' immediately'),
+            row, 'behavior.immediate-warn', start=1)
         row += 1
         self.add_checkbox(
             grid, _('Show plugin status dialog on plugin load error'),
@@ -1119,6 +1133,23 @@ class GrampsPreferences(ConfigureDialog):
         config.set('preferences.place-format', obj.get_active())
         self.uistate.emit('placeformat-changed')
 
+    def cb_coord_fmt_changed(self, obj):
+        """
+        Called when the coordinates format is changed.
+        """
+        config.set('preferences.coord-format', obj.get_active())
+        self.uistate.emit('placeformat-changed')  # Do we need to add a new signal ?
+
+    def cb_coord_fmt_rebuild(self):
+        """
+        Called to rebuild the coordinates format list.
+        """
+        model = Gtk.ListStore(str)
+        for fmt in coord_formats:
+            model.append([fmt])
+        self.cformat.set_model(model)
+        self.cformat.set_active(0)
+
     def cb_pa_sur_changed(self, *args):
         """
         Checkbox patronymic as surname changed, propagate to namedisplayer
@@ -1203,6 +1234,27 @@ class GrampsPreferences(ConfigureDialog):
         self.auto_title_changed(cb_widget)
         hbox.pack_start(self.pformat, True, True, 0)
         hbox.pack_start(self.fmt_btn, False, False, 0)
+        grid.attach(hbox, 2, row, 2, 1)
+
+        row += 1
+        # Coordinates display format:
+        self.cformat = Gtk.ComboBox()
+        self.cformat.set_hexpand(True)
+        renderer = Gtk.CellRendererText()
+        self.cformat.pack_start(renderer, True)
+        self.cformat.add_attribute(renderer, "text", 0)
+        self.cb_coord_fmt_rebuild()
+        if not config.is_set('preferences.coord-format'):
+            config.register('preferences.coord-format', 0)
+        active = config.get('preferences.coord-format')
+        self.cformat.set_active(active)
+        self.cformat.connect('changed', self.cb_coord_fmt_changed)
+        hbox = Gtk.Box()
+        lwidget = BasicLabel(_("%s: ") % _('Coordinates format'))
+        lwidget.set_use_underline(True)
+        lwidget.set_mnemonic_widget(self.cformat)
+        hbox.pack_start(self.cformat, True, True, 0)
+        grid.attach(lwidget, 1, row, 1, 1)
         grid.attach(hbox, 2, row, 2, 1)
 
         row += 1
@@ -1303,6 +1355,12 @@ class GrampsPreferences(ConfigureDialog):
                              % _('Age display precision *'))
         grid.attach(lwidget, 1, row, 1, 1)
         grid.attach(obox, 2, row, 2, 1)
+
+        row += 1
+        # Display ages for events after death
+        self.add_checkbox(
+            grid, _("Display ages for events after death *"),
+            row, 'preferences.age-after-death', start=2, stop=3)
 
         row += 1
         # Calendar format on report:
@@ -1603,14 +1661,14 @@ class GrampsPreferences(ConfigureDialog):
                                 row, 'behavior.spellcheck', start=1, stop=3,
                                 tooltip=_("Enable the spelling checker"
                                           " for notes."))
-        if not HAVE_GTKSPELL:
+        if not HAVE_GSPELL:
             obj.set_sensitive(False)
             spell_dict = {'gramps_wiki_build_spell_url':
                           URL_WIKISTRING +
                           "GEPS_029:_GTK3-GObject_introspection"
                           "_Conversion#Spell_Check_Install"}
             obj.set_tooltip_text(
-                _("GtkSpell not loaded. "
+                _("Gspell not loaded. "
                   "Spell checking will not be available.\n"
                   "To build it for Gramps see "
                   "%(gramps_wiki_build_spell_url)s") % spell_dict)
@@ -2043,7 +2101,7 @@ class GrampsPreferences(ConfigureDialog):
                       _('_Apply'), Gtk.ResponseType.OK)
         dbpath = config.get('database.path')
         if not dbpath:
-            dbpath = os.path.join(HOME_DIR, 'grampsdb')
+            dbpath = os.path.join(USER_DATA, 'grampsdb')
         f.set_current_folder(os.path.dirname(dbpath))
 
         status = f.run()

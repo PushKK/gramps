@@ -80,7 +80,7 @@ from gramps.gen.utils.db import get_birth_or_fallback, get_death_or_fallback
 from gramps.gen.datehandler import parser as _dp
 from gramps.plugins.lib.libhtml import Html, xml_lang
 from gramps.plugins.lib.libhtmlbackend import HtmlBackend, process_spaces
-from gramps.gen.utils.place import conv_lat_lon
+from gramps.gen.utils.place import conv_lat_lon, coord_formats
 from gramps.gen.utils.location import get_main_location
 from gramps.plugins.webreport.common import (_NAME_STYLE_DEFAULT, HTTP, HTTPS,
                                              add_birthdate, CSS, html_escape,
@@ -881,7 +881,7 @@ class BasePage:
         found = any(data[3] == place_handle and data[4] == event_date
                     for data in place_lat_long)
         if not found:
-            placetitle = _pd.display(self.r_db, place)
+            placetitle = _pd.display(self.r_db, place, fmt=0)
             latitude = place.get_latitude()
             longitude = place.get_longitude()
             if latitude and longitude:
@@ -1012,7 +1012,8 @@ class BasePage:
 
         place_hyper = None
         if place:
-            place_name = _pd.display(self.r_db, place, evt.get_date_object())
+            place_name = _pd.display(self.r_db, place,
+                                     evt.get_date_object(), fmt=0)
             place_hyper = self.place_link(place_handle, place_name,
                                           uplink=uplink)
 
@@ -1076,7 +1077,7 @@ class BasePage:
                 if place_handle:
                     place = self.r_db.get_place_from_handle(place_handle)
                     if place:
-                        place_title = _pd.display(self.r_db, place)
+                        place_title = _pd.display(self.r_db, place, fmt=0)
                         place_hyper = self.place_link(
                             place_handle, place_title,
                             place.get_gramps_id(), uplink=True)
@@ -2165,7 +2166,7 @@ class BasePage:
                                                             "evt", True)
             elif classname == "Place":
                 _obj = self.r_db.get_place_from_handle(newhandle)
-                _name = _pd.display(self.r_db, _obj)
+                _name = _pd.display(self.r_db, _obj, fmt=0)
                 if not _name:
                     _name = self._("Unknown")
                 _linkurl = self.report.build_url_fname_html(newhandle,
@@ -2406,7 +2407,7 @@ class BasePage:
                     toggle += lightboxes_2
                     if lightbox < len(photolist):
                         toggle += Html("h3",
-                                       self._("Other media: vidéos, pdfs..."),
+                                       self._("Other media: videos, pdfs..."),
                                        inline=True)
                 if medias:
                     toggle += medias
@@ -2960,7 +2961,8 @@ class BasePage:
             tbody += trow
 
         data = place.get_latitude()
-        v_lat, v_lon = conv_lat_lon(data, "0.0", "D.D8")
+        v_lat, v_lon = conv_lat_lon(data, "0.0",
+                                    coord_formats[self.report.options['coord_format']])
         if not v_lat:
             data += self._(":")
             # We use the same message as in:
@@ -2974,11 +2976,12 @@ class BasePage:
             trow = Html('tr') + (
                 Html("td", self._("Latitude"), class_="ColumnAttribute",
                      inline=True),
-                Html("td", data, class_="ColumnValue", inline=True)
+                Html("td", v_lat, class_="ColumnValue", inline=True)
             )
             tbody += trow
         data = place.get_longitude()
-        v_lat, v_lon = conv_lat_lon("0.0", data, "D.D8")
+        v_lat, v_lon = conv_lat_lon("0.0", data,
+                                    coord_formats[self.report.options['coord_format']])
         if not v_lon:
             data += self._(":")
             # We use the same message as in:
@@ -2992,7 +2995,7 @@ class BasePage:
             trow = Html('tr') + (
                 Html("td", self._("Longitude"), class_="ColumnAttribute",
                      inline=True),
-                Html("td", data, class_="ColumnValue", inline=True)
+                Html("td", v_lon, class_="ColumnValue", inline=True)
             )
             tbody += trow
 
@@ -3331,9 +3334,17 @@ class BasePage:
                 if self.reference_sort:
                     role = self.birth_death_dates(gid)
                 elif role[1:2] == ':':
+                    # format of role is role_type:ISO date string
+                    if role.count(':') > 1:
+                        print("Invalid date :", role[2:], " for individual with ID:", gid,
+                              ". Please, use the 'verify the data' tool to correct this.")
+                        cal, role = role.split(':', 1)
+                    else:
+                        cal, role = role.split(':')
+
                     # cal is the original calendar
-                    cal, role = role.split(':')
-                    # conver ISO date to Date for translation.
+
+                    # convert ISO date to Date for translation.
                     # all modifiers are in english, so convert them
                     # to the local language
                     if len(role.split(' - ')) > 1:

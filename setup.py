@@ -23,7 +23,7 @@
 #
 
 '''
-Gramps distutils module.
+Gramps setuptools module.
 '''
 
 #check python version first
@@ -32,11 +32,11 @@ import sys
 if sys.version_info < (3, 5):
     raise SystemExit("Gramps requires Python 3.5 or later.")
 
-from distutils import log
-from setuptools import setup
-from distutils.core import Command
-from distutils.util import convert_path, newer
-from distutils.command.build import build as _build
+from setuptools import setup, Command
+try:
+    from setuptools.command.build import build as _build
+except ImportError:
+    from distutils.command.build import build as _build
 import os
 import glob
 import codecs
@@ -45,7 +45,9 @@ from stat import ST_MODE
 from gramps.version import VERSION
 import unittest
 import argparse
+import logging
 
+_LOG = logging.getLogger(".setup")
 
 svem_flag = '--single-version-externally-managed'
 if svem_flag in sys.argv:
@@ -57,6 +59,17 @@ argparser.add_argument("--no-compress-manpages", dest="no_compress_manpages",
                        action="store_true")
 args, passthrough = argparser.parse_known_args()
 sys.argv = [sys.argv[0]] + passthrough
+
+def newer(source, target):
+    '''
+    Determines if a target file needs to be rebuilt.
+
+    Returns True if the target file doesn't exist or if the source file is
+    newer than the target file.
+    '''
+    if not os.path.exists(target):
+        return True
+    return os.path.getmtime(source) > os.path.getmtime(target)
 
 def substitute_variables(filename_in, filename_out, subst_vars):
     '''
@@ -99,15 +112,15 @@ def build_trans(build_cmd):
             os.makedirs(mo_dir)
 
         if newer(po_file, mo_file):
-            cmd = 'msgfmt %s -o %s' % (po_file, mo_file)
-            if os.system(cmd) != 0:
+            cmd = ['msgfmt', po_file, '-o', mo_file]
+            if subprocess.call(cmd) != 0:
                 os.remove(mo_file)
                 msg = 'ERROR: Building language translation files failed.'
                 ask = msg + '\n Continue building y/n [n] '
                 reply = input(ask)
                 if reply in ['n', 'N']:
                     raise SystemExit(msg)
-            log.info('Compiling %s >> %s', po_file, mo_file)
+            _LOG.info('Compiling %s >> %s', po_file, mo_file)
 
         #linux specific piece:
         target = 'share/locale/' + lang + '/LC_MESSAGES'
@@ -146,7 +159,7 @@ def build_man(build_cmd):
                     with open(newfile, 'rb') as f_in,\
                             gzip.open(man_file_gz, 'wb') as f_out:
                         f_out.writelines(f_in)
-                        log.info('Compiling %s >> %s', filename, man_file_gz)
+                        _LOG.info('Compiling %s >> %s', filename, man_file_gz)
 
                     os.remove(newfile)
                     filename = False
@@ -163,35 +176,30 @@ def build_intl(build_cmd):
     data_files = build_cmd.distribution.data_files
     base = build_cmd.build_base
 
-    merge_files = (('data/org.gramps_project.Gramps.desktop', 'share/applications', '--desktop'),
-                   ('data/org.gramps_project.Gramps.xml', 'share/mime/packages', '--xml'),
-                   ('data/org.gramps_project.Gramps.appdata.xml', 'share/metainfo', '--xml'))
+    merge_files = (('org.gramps_project.Gramps.desktop', 'share/applications', '--desktop'),
+                   ('org.gramps_project.Gramps.xml', 'share/mime/packages', '--xml'),
+                   ('org.gramps_project.Gramps.appdata.xml', 'share/metainfo', '--xml'))
 
     for filename, target, option in merge_files:
-        filenamelocal = convert_path(filename)
+        filenamelocal = os.path.join('data', filename)
         newfile = os.path.join(base, filenamelocal)
         newdir = os.path.dirname(newfile)
         if not(os.path.isdir(newdir) or os.path.islink(newdir)):
             os.makedirs(newdir)
         merge(filenamelocal + '.in', newfile, option)
-        data_files.append((target, [base + '/' + filename]))
+        data_files.append((target, [base + '/data/' + filename]))
 
 def merge(in_file, out_file, option, po_dir='po'):
     '''
     Run the msgfmt command.
     '''
     if (not os.path.exists(out_file) and os.path.exists(in_file)):
-        cmd = (('GETTEXTDATADIR=%(po_dir)s msgfmt %(opt)s '
-                '--template %(in_file)s -d %(po_dir)s -o %(out_file)s') %
-                {'opt' : option,
-                 'po_dir' : po_dir,
-                 'in_file' : in_file,
-                 'out_file' : out_file})
-        if os.system(cmd) != 0:
+        cmd = ['msgfmt', option, '--template', in_file, '-d', po_dir, '-o', out_file]
+        if subprocess.call(cmd, env={'GETTEXTDATADIR': po_dir}) != 0:
             msg = ('ERROR: %s was not merged into the translation files!\n' %
                     out_file)
             raise SystemExit(msg)
-        log.info('Compiling %s >> %s', in_file, out_file)
+        _LOG.info('Compiling %s >> %s', in_file, out_file)
 
 class build(_build):
     """Custom build command."""

@@ -55,7 +55,7 @@ from gramps.gen.display.place import displayer as _pd
 from gramps.gui.views.navigationview import NavigationView
 from gramps.gen.utils.libformatting import FormattingHelper
 from gramps.gen.errors import WindowActiveError
-from gramps.gen.const import HOME_DIR
+from gramps.gen.const import USER_HOME
 from gramps.gen.config import config
 from gramps.gui.editors import EditPlace, EditEvent, EditFamily, EditPerson
 from gramps.gui.selectors.selectplace import SelectPlace
@@ -83,7 +83,6 @@ _LOG = logging.getLogger("maps.geography")
 #
 # -------------------------------------------------------------------------
 _ = glocale.translation.sgettext
-GEOGRAPHY_PATH = os.path.join(HOME_DIR, "maps")
 
 # -------------------------------------------------------------------------
 #
@@ -116,7 +115,7 @@ class GeoGraphyView(OsmGps, NavigationView):
     """
     # settings in the config file
     CONFIGSETTINGS = (
-        ('geography.path', GEOGRAPHY_PATH),
+        ('geography.path', constants.GEOGRAPHY_PATH),
 
         ('geography.zoom', 10),
         ('geography.zoom_when_center', 12),
@@ -147,7 +146,7 @@ class GeoGraphyView(OsmGps, NavigationView):
         self.lock = config.get("geography.lock")
         tile_path = config.get('geography.path')
         if tile_path == "":
-            config.set('geography.path', GEOGRAPHY_PATH)
+            config.set('geography.path', constants.GEOGRAPHY_PATH)
         else:
             # verify is the path always exists
             if os.path.exists(tile_path) and os.path.isdir(tile_path):
@@ -218,10 +217,12 @@ class GeoGraphyView(OsmGps, NavigationView):
         """
         self.goto_handle(None)
 
-    def add_bookmark(self, *obj):
+    def add_bookmark(self, menu, handle):
         """
         Add the place to the bookmark
         """
+        dummy_menu = menu
+        dummy_hdle = handle
         mlist = self.selected_handles()
         if mlist:
             self.bookmarks.add(mlist[0])
@@ -872,14 +873,6 @@ class GeoGraphyView(OsmGps, NavigationView):
         Print or save the view that is currently shown
         """
         dummy_obj = obj
-        if Gtk.MAJOR_VERSION == 3 and Gtk.MINOR_VERSION < 11:
-            from gramps.gui.dialog import WarningDialog
-            WarningDialog(
-                _("You can't use the print functionality"),
-                _("Your Gtk version is too old."),
-                parent=self.uistate.window)
-            return
-
         req = self.osm.get_allocation()
         widthpx = req.width
         heightpx = req.height
@@ -1022,7 +1015,7 @@ class GeoGraphyView(OsmGps, NavigationView):
             transient_for=self.uistate.window)
         kml.add_buttons(_('_Cancel'), Gtk.ResponseType.CANCEL,
                         _('_Apply'), Gtk.ResponseType.OK)
-        mpath = HOME_DIR
+        mpath = USER_HOME
         kml.set_current_folder(os.path.dirname(mpath))
         kml.set_filter(filtering)
 
@@ -1305,8 +1298,8 @@ class GeoGraphyView(OsmGps, NavigationView):
                                   self.set_tilepath, self.select_tilepath)
         configdialog.add_text(
             grid,
-            _('If you have no more space in your file system.'
-              ' You can remove all tiles placed in the above'
+            _('If you have no more space in your file system,'
+              ' you can remove all tiles placed in the above'
               ' path.\nBe careful! If you have no internet,'
               ' you\'ll get no map.'),
             2, line_wrap=False)
@@ -1372,7 +1365,7 @@ class GeoGraphyView(OsmGps, NavigationView):
         if self.path_entry.get_text().strip():
             config.set('geography.path', self.path_entry.get_text())
         else:
-            config.set('geography.path', GEOGRAPHY_PATH)
+            config.set('geography.path', constants.GEOGRAPHY_PATH)
 
     def select_tilepath(self, *obj):
         """
@@ -1387,7 +1380,7 @@ class GeoGraphyView(OsmGps, NavigationView):
                                  _('_Apply'), Gtk.ResponseType.OK)
         mpath = config.get('geography.path')
         if not mpath:
-            mpath = HOME_DIR
+            mpath = USER_HOME
         selected_dir.set_current_folder(os.path.dirname(mpath))
 
         status = selected_dir.run()
