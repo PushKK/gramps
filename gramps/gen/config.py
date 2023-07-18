@@ -41,7 +41,7 @@ import logging
 # Gramps imports
 #
 #---------------------------------------------------------------
-from .const import HOME_DIR, USER_HOME, VERSION_DIR
+from .const import USER_CONFIG, USER_DATA, USER_HOME, VERSION_DIR
 from .utils.configmanager import ConfigManager
 from .const import GRAMPS_LOCALE as glocale
 _ = glocale.translation.gettext
@@ -146,6 +146,7 @@ register('behavior.max-age-prob-alive', 110)
 register('behavior.max-sib-age-diff', 20)
 register('behavior.min-generation-years', 13)
 register('behavior.owner-warn', False)
+register('behavior.immediate-warn', False)
 register('behavior.pop-plugin-status', False)
 register('behavior.recent-export-type', 3)
 register('behavior.runcheck', False)
@@ -166,7 +167,7 @@ register('database.compress-backup', True)
 register('database.backup-path', USER_HOME)
 register('database.backup-on-exit', True)
 register('database.autobackup', 0)
-register('database.path', os.path.join(HOME_DIR, 'grampsdb'))
+register('database.path', os.path.join(USER_DATA, 'grampsdb'))
 register('database.host', '')
 register('database.port', '')
 
@@ -282,12 +283,15 @@ register('preferences.last-view', '')
 register('preferences.last-views', [])
 register('preferences.family-relation-type', 3) # UNKNOWN
 register('preferences.age-display-precision', 1)
+register('preferences.age-after-death', True)
 
 register('colors.scheme', 0)
 register('colors.male-alive', ['#b8cee6', '#1f344a'])
 register('colors.male-dead', ['#b8cee6', '#2d3039'])
 register('colors.female-alive', ['#feccf0', '#62242D'])
 register('colors.female-dead', ['#feccf0', '#3a292b'])
+register('colors.other-alive', ['#94ef9e', '#285b27'])
+register('colors.other-dead', ['#94ef9e', '#062304'])
 register('colors.unknown-alive', ['#f3dbb6', '#75507B'])
 register('colors.unknown-dead', ['#f3dbb6', '#35103b'])
 register('colors.family', ['#eeeeee', '#454545'])
@@ -301,6 +305,8 @@ register('colors.border-male-alive', ['#1f4986', '#171d26'])
 register('colors.border-male-dead', ['#000000', '#000000'])
 register('colors.border-female-alive', ['#861f69', '#261111'])
 register('colors.border-female-dead', ['#000000', '#000000'])
+register('colors.border-other-alive', ['#2a5f16', '#26a269'])
+register('colors.border-other-dead', ['#000000', '#000000'])
 register('colors.border-unknown-alive', ['#8e5801', '#8e5801'])
 register('colors.border-unknown-dead', ['#000000', '#000000'])
 register('colors.border-family', ['#cccccc', '#252525'])
@@ -346,10 +352,10 @@ if __debug__: # enable a simple CLI test to see if the datestrings exist
 # we can tell by seeing if there is a key file for this version:
 if not os.path.exists(CONFIGMAN.filename):
     # If not, let's read old if there:
-    if os.path.exists(os.path.join(HOME_DIR, "keys.ini")):
+    if os.path.exists(os.path.join(USER_CONFIG, "keys.ini")):
         # read it in old style:
         logging.warning("Importing old key file 'keys.ini'...")
-        CONFIGMAN.load(os.path.join(HOME_DIR, "keys.ini"),
+        CONFIGMAN.load(os.path.join(USER_CONFIG, "keys.ini"),
                        oldstyle=True)
         logging.warning("Done importing old key file 'keys.ini'")
     # other version upgrades here...
