@@ -280,6 +280,7 @@ for calendar in (
             )
             dates.append(d)
 
+
 # CAL_SWEDISH    - Swedish calendar 1700-03-01 -> 1712-02-30!
 class Context:
     def __init__(self, retval):
@@ -344,6 +345,7 @@ with Context(Date.CAL_SWEDISH) as calendar:
             d = Date()
             d.set(quality, modifier, calendar, (4, month, year, False), "Text comment")
             swedish_dates.append(d)
+
 
 # -------------------------------------------------------------------------
 #
@@ -1231,6 +1233,42 @@ class EmptyDateTest(BaseDateTest):
         d = Date()
         d.set(value=(1, 1, 1900, False, 1, 1, 1910, False), modifier=Date.MOD_SPAN)
         self.assertFalse(d.is_empty())
+
+
+# -------------------------------------------------------------------------
+#
+# AnniversaryDateTest
+#
+# -------------------------------------------------------------------------
+class AnniversaryDateTest(BaseDateTest):
+    """
+    Tests for leap day anniversary dates.
+    """
+
+    def test_leapyear_1(self):
+        config.set("preferences.february-29", 0)
+        d = Date(1904, 2, 29)
+        self.assertEqual(d.anniversary(1908), (2, 29))
+
+    def test_leapyear_2(self):
+        config.set("preferences.february-29", 1)
+        d = Date(1904, 2, 29)
+        self.assertEqual(d.anniversary(1908), (2, 29))
+
+    def test_nonleapyear_before(self):
+        config.set("preferences.february-29", 0)
+        d = Date(1904, 2, 29)
+        self.assertEqual(d.anniversary(1910), (2, 28))
+
+    def test_nonleapyear_after(self):
+        config.set("preferences.february-29", 1)
+        d = Date(1904, 2, 29)
+        self.assertEqual(d.anniversary(1910), (3, 1))
+
+    def test_nonleapyear_keep(self):
+        config.set("preferences.february-29", 2)
+        d = Date(1904, 2, 29)
+        self.assertEqual(d.anniversary(1910), (2, 29))
 
 
 if __name__ == "__main__":

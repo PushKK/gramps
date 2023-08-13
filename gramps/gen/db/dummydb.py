@@ -46,23 +46,24 @@ methods should be changed to generate exceptions. Possibly by globally changing
 'LOG.debug' to 'raise DbException'.
 """
 
-#-------------------------------------------------------------------------
+# -------------------------------------------------------------------------
 #
 # Python libraries
 #
-#-------------------------------------------------------------------------
+# -------------------------------------------------------------------------
 import logging
 import inspect
 from abc import ABCMeta
 from types import FunctionType
 from functools import wraps
 
-#-------------------------------------------------------------------------
+# -------------------------------------------------------------------------
 #
 # Gramps libraries
 #
-#-------------------------------------------------------------------------
+# -------------------------------------------------------------------------
 from .base import DbReadBase
+from .bookmarks import DbBookmarks
 from .dbconst import DBLOGNAME
 from ..errors import HandleError
 from ..utils.callback import Callback
@@ -72,85 +73,21 @@ from ..const import GRAMPS_LOCALE as glocale
 LOG = logging.getLogger(DBLOGNAME)
 
 
-#-------------------------------------------------------------------------
-#
-# class DbBookmarks
-#
-#-------------------------------------------------------------------------
-class Bookmarks:
-    """
-    Dummy Bookmarks class. This needs to be defined here, because get is used to
-    return the bookmark.
-    """
-    def __init__(self, default=[]):
-        """
-        Initialise the bookmark, either with a copy of the passed list, or with
-        an empty list.
-        """
-        self.bookmarks = list(default) # want a copy (not an alias)
-
-    def set(self, new_list):
-        """
-        Set the bookmark to a new list
-        """
-        self.bookmarks = list(new_list)
-
-    def get(self):
-        """
-        Get the current bookmark list
-        """
-        return self.bookmarks
-
-    def append(self, item):
-        """
-        Append a bookmark to the list
-        """
-        self.bookmarks.append(item)
-
-    def append_list(self, blist):
-        """
-        Append a list of bookmarks to the bookmark
-        """
-        self.bookmarks += blist
-
-    def remove(self, item):
-        """
-        Remove an item from the bookmark
-        """
-        self.bookmarks.remove(item)
-
-    def pop(self, item):
-        """
-        Pop an item off the bookmark list, returning the popped item
-        """
-        return self.bookmarks.pop(item)
-
-    def insert(self, pos, item):
-        """
-        Insert an item at a specified place in thebookmark list
-        """
-        self.bookmarks.insert(pos, item)
-
-    def close(self):
-        """
-        Close the bookmark, deleting the data.
-        """
-        del self.bookmarks
-
-#-------------------------------------------------------------------------
+# -------------------------------------------------------------------------
 #
 # some magic, see http://stackoverflow.com/questions/11349183/how-to-wrap-every-
 # method-of-a-class
 #
 # This processes the DummyDb class for diagnostic purposes to wrap each method
 # with code to log the method name and where it was called from.
-#-------------------------------------------------------------------------
+# -------------------------------------------------------------------------
 def wrapper(method):
     """
     wrapper method that returns a 'wrapped' method which can be wrapped round
     every function in a class. The 'wrapped' method logs the original function
     that was called, and where it was called from.
     """
+
     @wraps(method)
     def wrapped(*args, **keywargs):
         """
@@ -163,10 +100,16 @@ def wrapper(method):
             frame = inspect.currentframe()
             c_frame = frame.f_back
             c_code = c_frame.f_code
-            LOG.debug('calling %s.%s()... from file %s, line %s in %s',
-                      class_name, func_name, c_code.co_filename,
-                      c_frame.f_lineno, c_code.co_name)
+            LOG.debug(
+                "calling %s.%s()... from file %s, line %s in %s",
+                class_name,
+                func_name,
+                c_code.co_filename,
+                c_frame.f_lineno,
+                c_code.co_name,
+            )
         return method(*args, **keywargs)
+
     return wrapped
 
 
@@ -175,6 +118,7 @@ class MetaClass(type):
     transform class by wrapping it with a diagnostic wrapper (if __debig__ is
     not set
     """
+
     def __new__(mcs, class_name, bases, classdict):
         """
         When the class this is applied to (DummyDb) is instantiated, each method
@@ -198,15 +142,26 @@ class M_A_M_B(ABCMeta, MetaClass):
     See recipe: http://code.activestate.com/recipes/204197-solving-the-
     metaclass-conflict/
     """
+
     pass
 
 
-#-------------------------------------------------------------------------
+# -------------------------------------------------------------------------
 #
 # class DummyDb
 #
-#-------------------------------------------------------------------------
-class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
+# -------------------------------------------------------------------------
+class DummyDb(
+    M_A_M_B(
+        "NewBaseClass",
+        (
+            DbReadBase,
+            Callback,
+            object,
+        ),
+        {},
+    )
+):
     """
     Gramps database object. This object is a dummy database class that is always
     empty and is read-only.
@@ -220,19 +175,19 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         """
         Callback.__init__(self)
         self.basedb = None
-        self.__feature = {} # {"feature": VALUE, ...}
+        self.__feature = {}  # {"feature": VALUE, ...}
         self.db_is_open = False
         self.readonly = True
         self.name_formats = []
-        self.bookmarks = Bookmarks()
-        self.family_bookmarks = Bookmarks()
-        self.event_bookmarks = Bookmarks()
-        self.place_bookmarks = Bookmarks()
-        self.citation_bookmarks = Bookmarks()
-        self.source_bookmarks = Bookmarks()
-        self.repo_bookmarks = Bookmarks()
-        self.media_bookmarks = Bookmarks()
-        self.note_bookmarks = Bookmarks()
+        self.bookmarks = DbBookmarks()
+        self.family_bookmarks = DbBookmarks()
+        self.event_bookmarks = DbBookmarks()
+        self.place_bookmarks = DbBookmarks()
+        self.citation_bookmarks = DbBookmarks()
+        self.source_bookmarks = DbBookmarks()
+        self.repo_bookmarks = DbBookmarks()
+        self.media_bookmarks = DbBookmarks()
+        self.note_bookmarks = DbBookmarks()
         self.owner = Researcher()
 
     def get_feature(self, feature):
@@ -240,7 +195,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         Databases can implement certain features or not. The default is
         None, unless otherwise explicitly stated.
         """
-        return self.__feature.get(feature, None) # can also be explicitly None
+        return self.__feature.get(feature, None)  # can also be explicitly None
 
     def set_feature(self, feature, value):
         """
@@ -533,7 +488,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         if not self.db_is_open:
             LOG.debug("database is closed")
         LOG.warning("handle %s does not exist in the dummy database", handle)
-        raise HandleError('Handle %s not found' % handle)
+        raise HandleError("Handle %s not found" % handle)
 
     def get_family_handles(self, sort_handles=False, locale=glocale):
         """
@@ -675,7 +630,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         if not self.db_is_open:
             LOG.debug("database is closed")
         LOG.warning("handle %s does not exist in the dummy database", handle)
-        raise HandleError('Handle %s not found' % handle)
+        raise HandleError("Handle %s not found" % handle)
 
     def get_note_handles(self):
         """
@@ -795,7 +750,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         if not self.db_is_open:
             LOG.debug("database is closed")
         LOG.warning("handle %s does not exist in the dummy database", handle)
-        raise HandleError('Handle %s not found' % handle)
+        raise HandleError("Handle %s not found" % handle)
 
     def get_person_attribute_types(self):
         """
@@ -842,7 +797,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         if not self.db_is_open:
             LOG.debug("database is closed")
         LOG.warning("handle %s does not exist in the dummy database", handle)
-        raise HandleError('Handle %s not found' % handle)
+        raise HandleError("Handle %s not found" % handle)
 
     def get_person_handles(self, sort_handles=False, locale=glocale):
         """
@@ -903,7 +858,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         if not self.db_is_open:
             LOG.debug("database is closed")
         LOG.warning("handle %s does not exist in the dummy database", handle)
-        raise HandleError('Handle %s not found' % handle)
+        raise HandleError("Handle %s not found" % handle)
 
     def get_place_handles(self, sort_handles=False, locale=glocale):
         """
@@ -926,7 +881,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         if not self.db_is_open:
             LOG.debug("database is closed")
         LOG.warning("handle %s does not exist in the dummy database", handle)
-        raise HandleError('Handle %s not found' % handle)
+        raise HandleError("Handle %s not found" % handle)
 
     def get_raw_family_data(self, handle):
         """
@@ -935,7 +890,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         if not self.db_is_open:
             LOG.debug("database is closed")
         LOG.warning("handle %s does not exist in the dummy database", handle)
-        raise HandleError('Handle %s not found' % handle)
+        raise HandleError("Handle %s not found" % handle)
 
     def get_raw_note_data(self, handle):
         """
@@ -944,7 +899,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         if not self.db_is_open:
             LOG.debug("database is closed")
         LOG.warning("handle %s does not exist in the dummy database", handle)
-        raise HandleError('Handle %s not found' % handle)
+        raise HandleError("Handle %s not found" % handle)
 
     def get_raw_media_data(self, handle):
         """
@@ -953,7 +908,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         if not self.db_is_open:
             LOG.debug("database is closed")
         LOG.warning("handle %s does not exist in the dummy database", handle)
-        raise HandleError('Handle %s not found' % handle)
+        raise HandleError("Handle %s not found" % handle)
 
     def get_raw_person_data(self, handle):
         """
@@ -962,7 +917,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         if not self.db_is_open:
             LOG.debug("database is closed")
         LOG.warning("handle %s does not exist in the dummy database", handle)
-        raise HandleError('Handle %s not found' % handle)
+        raise HandleError("Handle %s not found" % handle)
 
     def get_raw_place_data(self, handle):
         """
@@ -971,7 +926,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         if not self.db_is_open:
             LOG.debug("database is closed")
         LOG.warning("handle %s does not exist in the dummy database", handle)
-        raise HandleError('Handle %s not found' % handle)
+        raise HandleError("Handle %s not found" % handle)
 
     def get_raw_repository_data(self, handle):
         """
@@ -980,7 +935,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         if not self.db_is_open:
             LOG.debug("database is closed")
         LOG.warning("handle %s does not exist in the dummy database", handle)
-        raise HandleError('Handle %s not found' % handle)
+        raise HandleError("Handle %s not found" % handle)
 
     def get_raw_source_data(self, handle):
         """
@@ -989,7 +944,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         if not self.db_is_open:
             LOG.debug("database is closed")
         LOG.warning("handle %s does not exist in the dummy database", handle)
-        raise HandleError('Handle %s not found' % handle)
+        raise HandleError("Handle %s not found" % handle)
 
     def get_raw_citation_data(self, handle):
         """
@@ -998,7 +953,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         if not self.db_is_open:
             LOG.debug("database is closed")
         LOG.warning("handle %s does not exist in the dummy database", handle)
-        raise HandleError('Handle %s not found' % handle)
+        raise HandleError("Handle %s not found" % handle)
 
     def get_raw_tag_data(self, handle):
         """
@@ -1007,7 +962,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         if not self.db_is_open:
             LOG.debug("database is closed")
         LOG.warning("handle %s does not exist in the dummy database", handle)
-        raise HandleError('Handle %s not found' % handle)
+        raise HandleError("Handle %s not found" % handle)
 
     def get_repo_bookmarks(self):
         """
@@ -1045,7 +1000,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         if not self.db_is_open:
             LOG.debug("database is closed")
         LOG.warning("handle %s does not exist in the dummy database", handle)
-        raise HandleError('Handle %s not found' % handle)
+        raise HandleError("Handle %s not found" % handle)
 
     def get_repository_handles(self):
         """
@@ -1116,7 +1071,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         if not self.db_is_open:
             LOG.debug("database is closed")
         LOG.warning("handle %s does not exist in the dummy database", handle)
-        raise HandleError('Handle %s not found' % handle)
+        raise HandleError("Handle %s not found" % handle)
 
     def get_source_handles(self, sort_handles=False, locale=glocale):
         """
@@ -1177,7 +1132,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         if not self.db_is_open:
             LOG.debug("database is closed")
         LOG.warning("handle %s does not exist in the dummy database", handle)
-        raise HandleError('Handle %s not found' % handle)
+        raise HandleError("Handle %s not found" % handle)
 
     def get_citation_handles(self, sort_handles=False, locale=glocale):
         """
@@ -1218,7 +1173,7 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         if not self.db_is_open:
             LOG.debug("database is closed")
         LOG.warning("handle %s does not exist in the dummy database", handle)
-        raise HandleError('Handle %s not found' % handle)
+        raise HandleError("Handle %s not found" % handle)
 
     def get_tag_from_name(self, val):
         """
@@ -1501,11 +1456,17 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
             LOG.debug("database is closed")
         return []
 
-    def load(self, name, callback=None, mode=None, force_schema_upgrade=False,
-             force_bsddb_upgrade=False,
-             force_bsddb_downgrade=False,
-             force_python_upgrade=False,
-             update=True):
+    def load(
+        self,
+        name,
+        callback=None,
+        mode=None,
+        force_schema_upgrade=False,
+        force_bsddb_upgrade=False,
+        force_bsddb_downgrade=False,
+        force_python_upgrade=False,
+        update=True,
+    ):
         """
         Open the specified database.
         """
@@ -1600,8 +1561,9 @@ class DummyDb(M_A_M_B("NewBaseClass", (DbReadBase, Callback, object,), {})):
         """
         LOG.warning("database is readonly")
 
-    def set_prefixes(self, person, media, family, source, citation,
-                     place, event, repository, note):
+    def set_prefixes(
+        self, person, media, family, source, citation, place, event, repository, note
+    ):
         """
         Set the prefixes for the gramps ids for all gramps objects
         """

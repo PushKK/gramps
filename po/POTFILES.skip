@@ -343,6 +343,7 @@ gramps/gui/editors/displaytabs/placenamemodel.py
 gramps/gui/editors/displaytabs/placerefmodel.py
 gramps/gui/editors/displaytabs/reporefmodel.py
 gramps/gui/editors/displaytabs/sourcebackreflist.py
+gramps/gui/editors/displaytabs/srcattrmodel.py
 gramps/gui/editors/displaytabs/surnamemodel.py
 gramps/gui/editors/displaytabs/webmodel.py
 #
@@ -455,6 +456,10 @@ gramps/gui/widgets/validatedcomboentry.py
 # plugins
 #
 gramps/plugins/__init__.py
+#
+# plugins/cite directory
+#
+gramps/plugins/cite/__init__.py
 #
 # plugins/db/bsddb directory
 #
